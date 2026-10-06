@@ -8,16 +8,18 @@ use Fideloper\Proxy\TrustProxies as Middleware;
 class TrustProxies extends Middleware
 {
     /**
-     * The trusted proxies for this application.
+     * Render and Cloudflare sit in front of the Laravel application.
+     * Trust their forwarded scheme/host headers so Laravel sees the
+     * original HTTPS request instead of the internal HTTP hop.
      *
-     * @var array
+     * @var array|string|null
      */
-    protected $proxies;
+    protected $proxies = '*';
 
     /**
      * The current proxy header mappings.
      *
-     * @var array
+     * @var int
      */
     protected $headers = [
         Request::HEADER_FORWARDED => 'FORWARDED',
