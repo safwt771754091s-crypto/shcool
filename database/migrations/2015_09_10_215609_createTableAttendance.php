@@ -6,40 +6,42 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateTableAttendance extends Migration {
 
-	/**
-	 * Run the migrations.
-	 *
-	 * @return void
-	 */
-	public function up()
-	{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        // A previous deployment can leave the table created while the
+        // migration record is not committed because MySQL DDL auto-commits.
+        if (Schema::hasTable('Attendance')) {
+            return;
+        }
+
         Schema::create('Attendance', function(Blueprint $table)
         {
-
-					$table->increments('id');
-					$table->string('regiNo',20);
-					$table->string('class_id',20);
-					$table->string('section_id',20);
-					$table->string('session',20);
-					$table->date('date');
-					$table->string('status',20);
-					$table->dateTime('created_at');
-					$table->foreign('regiNo')
-					->references('regiNo')->on('Student');
-
-
-
+            $table->increments('id');
+            $table->string('regiNo',20);
+            $table->string('class_id',20);
+            $table->string('section_id',20);
+            $table->string('session',20);
+            $table->date('date');
+            $table->string('status',20);
+            $table->dateTime('created_at');
+            $table->foreign('regiNo')
+                ->references('regiNo')->on('Student');
         });
-	}
+    }
 
-	/**
-	 * Reverse the migrations.
-	 *
-	 * @return void
-	 */
-	public function down()
-	{
-        Schema::drop('Attendance');
-	}
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('Attendance');
+    }
 
 }
