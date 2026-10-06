@@ -53,6 +53,8 @@ Route::get('/session', [UsersController::class, 'session']);
 
 Route::group(['middleware' => ['web', 'activity']], function () {
     Route::get('/', [HomeController::class, 'index'])->name("login");
+    Route::get('/register', [UsersController::class, 'showRegistration'])->name('register');
+    Route::post('/register', [UsersController::class, 'register']);
     Route::get('/dashboard/', [DashboardController::class, 'index']);
     Route::post('/users/login', [UsersController::class, 'postSignin']);
     Route::get('/verification_code', [UsersController::class, 'codeverify']);
