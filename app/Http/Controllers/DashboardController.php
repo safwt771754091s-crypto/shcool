@@ -68,7 +68,7 @@ class DashboardController extends BaseController {
  		$totallate       = Attendance::where('date',Carbon::now()->format('Y-m-d'))->where('status','Late')->count();
 
  		//echo "<pre>";print_r($totalabsent );exit;
- 		$totalExam = Marks::groupBy('exam','subject')->get();
+ 		$totalExam = Marks::select('exam', 'subject')->groupBy('exam', 'subject')->get();
 		$book      = AddBook::count();
  		$total     = [
  			'class'       =>$tclass,
