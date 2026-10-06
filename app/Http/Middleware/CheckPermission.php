@@ -16,7 +16,7 @@ class CheckPermission
      */
     public function handle($request, Closure $next,$permission_name)
     {
-        //return $next($request);
+        // Admin users have full platform access. Other roles continue through the granular permission table.\n        if (strtolower((string) Auth::user()->group) === 'admin') {\n            return $next($request);\n        }\n\n        //return $next($request);
          //here you have to get logged in user role
         $role = strtolower(Auth::user()->group);
         //$role = 'admin';
