@@ -85,7 +85,7 @@ class DashboardController extends BaseController {
  	//   dd($tstudent);
  		$monthlyIncome = Accounting::selectRaw('month(date) as month, sum(amount) as amount, year(date) as year')
 				 		->where('type','Income')
-				 		->groupBy('month')
+				 		->groupByRaw('month(date), year(date)')
 				 		->get();
 //,DB::RAW('IFNULL(sum(payableAmount),0) as payTotal,IFNULL(sum(paidAmount),0) as paiTotal,(IFNULL(sum(payableAmount),0)- IFNULL(sum(paidAmount),0)) as dueamount')
  		$tutionfees = FeeCol::join('billHistory','stdBill.billNo','=','billHistory.billNo')->select(DB::RAW('billHistory.month, year(stdBill.created_at) as year,sum(stdBill.payableAmount) as payTotal,IFNULL(sum(paidAmount),0) as paiTotal,(IFNULL(sum(payableAmount),0)- IFNULL(sum(paidAmount),0)) as dueamount'))
@@ -139,7 +139,7 @@ class DashboardController extends BaseController {
               
  		$monthlyExpences = Accounting::selectRaw('month(date) as month, sum(amount) as amount, year(date) as year')
 								 		->where('type','Expence')
-								 		->groupBy('month')
+								 		->groupByRaw('month(date), year(date)')
 								 		->get();
 
  			//echo "<pre>";print_r($monthlyExpences->toArray() );exit;
