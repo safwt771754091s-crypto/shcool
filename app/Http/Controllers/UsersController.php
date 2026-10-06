@@ -13,6 +13,7 @@ use App\Models\VerifyCode;
 use App\Models\VerificationCode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 use Hash;
 
@@ -324,45 +325,37 @@ class UsersController extends BaseController
     //return View::Make('app.users',compact('users','user'));
     return View('app.users', compact('users', 'user'));
   }
-  public  function create(Request $request)
+  public function create(Request $request)
   {
-    $rules = [
-      'firstname' => 'required',
-      'lastname' => 'required',
-      'email' => 'required|email',
-      'group' => 'required',
-      'desc' => 'required',
-      'login' => 'required',
-      'password' => 'required'
+    $data = $request->validate([
+      'firstname' => ['required', 'string', 'max:100'],
+      'lastname' => ['required', 'string', 'max:100'],
+      'email' => ['required', 'email', 'max:190', 'unique:users,email'],
+      'login' => ['required', 'string', 'max:100', 'unique:users,login'],
+      'password' => ['required', 'string', 'min:8', 'confirmed'],
+      'group' => ['required', 'in:Director,Admin,Teacher,Accountant,Staff,Other'],
+      'desc' => ['nullable', 'string', 'max:1000'],
+      'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+    ]);
 
-    ];
-    $validator = \Validator::make($request->all(), $rules);
-    if ($validator->fails()) {
-      return Redirect::to('/users')->withInput($request->all())->withErrors($validator);
-    } else {
+    $user = new User();
+    $user->firstname = $data['firstname'];
+    $user->lastname = $data['lastname'];
+    $user->login = $data['login'];
+    $user->email = $data['email'];
+    $user->group = $data['group'];
+    $user->desc = $data['desc'] ?? '';
+    $user->password = Hash::make($data['password']);
 
-      $uexits = User::select('*')->where('email', '=', $request->input('email'))->where('login', '=', $request->input('login'))->get();
-      //  dd($uexits );
-      //echo "<pre>";print_r($uexits);exit;
-      if (count($uexits) > 0) {
-        $errorMessages = new \Illuminate\Support\MessageBag;
-        $errorMessages->add('deplicate', 'User all ready exists with this email or login');
-        return Redirect::to('/users')->withInput($request->all())->withErrors($errorMessages);
-      } {
-        $user = new User;
-        $user->firstname = $request->input('firstname');
-        $user->lastname = $request->input('lastname');
-        $user->login = $request->input('login');
-        $user->desc = $request->input('desc');
-        $user->email = $request->input('email');
-        $user->group = $request->input('group');
-        $user->password = Hash::make($request->input('password'));
-        $user->save();
-
-        return Redirect::to('/users')->with("success", "User Created Succesfully.");
-      }
+    if ($request->hasFile('avatar')) {
+      $user->avatar = $request->file('avatar')->store('avatars', 'public');
     }
+
+    $user->save();
+
+    return Redirect::to('/users')->with('success', 'تم إنشاء المستخدم بنجاح.');
   }
+
   public function edit($id)
   {
     $user = User::find($id);
@@ -370,62 +363,69 @@ class UsersController extends BaseController
     //return View::Make('app.users',compact('users','user'));
     return View('app.users', compact('users', 'user'));
   }
-  public  function update(Request $request)
+  public function update(Request $request)
   {
-    $rules = [
-      'firstname' => 'required',
-      'lastname'  => 'required',
-      'email'     => 'required|email',
-      'group'     => 'required',
-      'desc'      => 'required',
-      'login'     => 'required',
-      'password'  => 'required'
+    $user = User::findOrFail($request->input('id'));
 
-    ];
-    $validator = \Validator::make($request->all(), $rules);
-    if ($validator->fails()) {
-      return Redirect::to('/usersedit/' . $request->input('id'))->withErrors($validator);
-    } else {
+    $data = $request->validate([
+      'id' => ['required', 'integer'],
+      'firstname' => ['required', 'string', 'max:100'],
+      'lastname' => ['required', 'string', 'max:100'],
+      'email' => ['required', 'email', 'max:190', 'unique:users,email,' . $user->id],
+      'login' => ['required', 'string', 'max:100', 'unique:users,login,' . $user->id],
+      'group' => ['required', 'in:Director,Admin,Teacher,Accountant,Staff,Other'],
+      'desc' => ['nullable', 'string', 'max:1000'],
+      'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+      'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+    ]);
 
-      $uexits = User::select('*')->orwhere('email', '=', $request->input('email'))->first();
-      if ($uexits->count() > 0) {
-
-        if ($uexits->id != $request->input('id')) {
-          $errorMessages = new \Illuminate\Support\MessageBag;
-          $errorMessages->add('deplicate', 'User all ready exists with this email');
-          return Redirect::to('/users')->withInput($request->all())->withErrors($errorMessages);
-        } else {
-          $user            = User::find($request->input('id'));
-          $user->firstname = $request->input('firstname');
-          $user->lastname  = $request->input('lastname');
-          $user->login     = $request->input('login');
-          $user->desc      = $request->input('desc');
-          $user->email     = $request->input('email');
-          $user->group     = $request->input('group');
-          $user->password  = Hash::make($request->input('password'));
-          $user->save();
-          return Redirect::to('/users')->with("success", "User Updated Succesfully.");
-        }
-      } else {
-        $user = User::find($request->input('id'));
-        $user->firstname = $request->input('firstname');
-        $user->lastname = $request->input('lastname');
-        $user->login = $request->input('login');
-        $user->desc = $request->input('desc');
-        $user->email = $request->input('email');
-        $user->group = $request->input('group');
-        $user->password = Hash::make($request->input('password'));
-        $user->save();
-        return Redirect::to('/users')->with("success", "User Updated Succesfully.");
-      }
+    // Never allow the current platform owner to be demoted or renamed away from Admin.
+    if (strtolower((string) $user->email) === strtolower((string) env('OWNER_EMAIL', 'Safwt771754091s@gmail.com'))) {
+      $data['group'] = 'Admin';
     }
+
+    $user->firstname = $data['firstname'];
+    $user->lastname = $data['lastname'];
+    $user->login = $data['login'];
+    $user->email = $data['email'];
+    $user->group = $data['group'];
+    $user->desc = $data['desc'] ?? '';
+
+    if ($request->hasFile('avatar')) {
+      if (!empty($user->avatar)) {
+        Storage::disk('public')->delete($user->avatar);
+      }
+      $user->avatar = $request->file('avatar')->store('avatars', 'public');
+    }
+
+    if (!empty($data['password'])) {
+      $user->password = Hash::make($data['password']);
+    }
+
+    $user->save();
+
+    return Redirect::to('/users')->with('success', 'تم تحديث المستخدم بنجاح.');
   }
 
   public function delete($id)
   {
-    $user = User::find($id);
+    $user = User::findOrFail($id);
+
+    if ((int) $user->id === (int) Auth::id()) {
+      return Redirect::to('/users')->with('error', 'لا يمكنك حذف الحساب الذي تستخدمه حالياً.');
+    }
+
+    if (strtolower((string) $user->email) === strtolower((string) env('OWNER_EMAIL', 'Safwt771754091s@gmail.com'))) {
+      return Redirect::to('/users')->with('error', 'لا يمكن حذف مالك المنصة.');
+    }
+
+    if (!empty($user->avatar)) {
+      Storage::disk('public')->delete($user->avatar);
+    }
+
     $user->delete();
-    return Redirect::to('/users')->with("success", "User Deleted Succesfully.");
+
+    return Redirect::to('/users')->with('success', 'تم حذف المستخدم بنجاح.');
   }
 
   public function generateCode($codeLength = 4)
