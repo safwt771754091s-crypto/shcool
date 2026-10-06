@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\UsersController;
+use App\Http\Controllers\UsersController;\nuse App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstituteController;
 use App\Http\Controllers\AttendanceController;
@@ -72,6 +72,10 @@ Route::group(['middleware' => ['web', 'activity']], function () {
     Route::get('/verify_code', [UsersController::class, 'verify_code']);
     Route::post('/verified', [UsersController::class, 'verified']);
     Route::get('/users/logout', [UsersController::class, 'getLogout']);
+    // Professional account profile: self-service identity, avatar and password controls.
+    Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth');
+    Route::post('/profile', [ProfileController::class, 'update'])->middleware('auth');
+
     Route::get('/users', [UsersController::class, 'show']);
     Route::post('/usercreate', [UsersController::class, 'create']);
     Route::get('/useredit/{id}', [UsersController::class, 'edit']);
