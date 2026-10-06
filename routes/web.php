@@ -56,6 +56,9 @@ Route::group(['middleware' => ['web', 'activity']], function () {
     Route::get('/register', [UsersController::class, 'showRegistration'])->name('register');
     Route::post('/register', [UsersController::class, 'register']);
     Route::get('/dashboard/', [DashboardController::class, 'index']);
+    Route::get('/user-have-no-permission', function () {
+        return response('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>لا توجد صلاحية</title><style>body{font-family:Tajawal,Cairo,Arial,sans-serif;background:#f4f7fb;margin:0;display:grid;place-items:center;min-height:100vh;color:#0f172a}.box{background:#fff;padding:32px;border-radius:20px;box-shadow:0 12px 40px rgba(15,23,42,.1);max-width:520px;text-align:center}a{display:inline-block;margin-top:18px;background:#1267e8;color:#fff;padding:10px 18px;border-radius:10px;text-decoration:none}</style></head><body><div class="box"><h2>لا توجد صلاحية لهذه العملية</h2><p>حسابك لا يملك الصلاحية المطلوبة للوصول إلى هذه الصفحة.</p><a href="/dashboard">العودة إلى لوحة التحكم</a></div></body></html>', 403);
+    });
     Route::post('/users/login', [UsersController::class, 'postSignin']);
     Route::get('/verification_code', [UsersController::class, 'codeverify']);
     Route::post('/users/code_check', [UsersController::class, 'code_check']);
