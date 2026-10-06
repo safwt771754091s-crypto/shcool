@@ -89,6 +89,7 @@
 
                         <p class="center col-md-5">
                             <button type="submit" class="btn btn-primary">دخول</button>
+                            <a href="{{ url("/register") }}" class="btn btn-default" style="margin-right:8px;">إنشاء حساب جديد</a>
                         </p>
                     </fieldset>
                 </form>
