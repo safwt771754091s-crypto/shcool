@@ -9,13 +9,11 @@ return new class extends Migration {
         $officialEmail = 'Safwt771754091s@gmail.com';
         $oldEmail = 'owner@hqeebat-almoalem.com';
 
-        // Remove the temporary owner account if it is not the official account.
         DB::table('users')
             ->where('email', $oldEmail)
             ->where('email', '!=', $officialEmail)
             ->delete();
 
-        // Promote/reconcile the official account as the single platform owner.
         $owner = DB::table('users')->where('email', $officialEmail)->first();
 
         if (!$owner) {
@@ -23,23 +21,23 @@ return new class extends Migration {
         }
 
         if ($owner) {
+            // login is a short internal identifier; email is the official identity.
             DB::table('users')->where('id', $owner->id)->update([
-                'login' => $officialEmail,
+                'login' => 'owner',
                 'email' => $officialEmail,
                 'group' => 'Admin',
                 'desc' => 'Platform Owner',
             ]);
-        }
 
-        // Remove any accidental duplicate owner login/email records, preserving the official account.
-        DB::table('users')
-            ->where('email', $officialEmail)
-            ->where('id', '!=', $owner?->id ?? 0)
-            ->delete();
+            DB::table('users')
+                ->where('email', $officialEmail)
+                ->where('id', '!=', $owner->id)
+                ->delete();
+        }
 
         DB::table('users')
             ->where('login', 'owner')
-            ->where('email', '!=', $officialEmail)
+            ->where('id', '!=', $owner?->id ?? 0)
             ->delete();
     }
 
