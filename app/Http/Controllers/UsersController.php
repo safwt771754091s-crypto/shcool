@@ -34,6 +34,35 @@ class UsersController extends BaseController
    *
    * @return Response
    */
+  public function showRegistration()
+  {
+    $institute = Institute::select('name')->first();
+    return view('register', compact('institute'));
+  }
+
+  public function register(Request $request)
+  {
+    $data = $request->validate([
+      'firstname' => 'required|string|max:100',
+      'lastname' => 'required|string|max:100',
+      'login' => 'required|string|max:100|unique:users,login',
+      'email' => 'required|email|max:190|unique:users,email',
+      'password' => 'required|string|min:8|confirmed',
+    ]);
+
+    User::create([
+      'firstname' => $data['firstname'],
+      'lastname' => $data['lastname'],
+      'login' => $data['login'],
+      'email' => $data['email'],
+      'group' => 'Other',
+      'desc' => 'Public registration',
+      'password' => Hash::make($data['password']),
+    ]);
+
+    return Redirect::to('/')->with('message', 'تم إنشاء الحساب بنجاح. يمكنك تسجيل الدخول الآن.');
+  }
+
   public function postSignin(request $request)
   {
 
