@@ -90,7 +90,7 @@ class DashboardController extends BaseController {
 //,DB::RAW('IFNULL(sum(payableAmount),0) as payTotal,IFNULL(sum(paidAmount),0) as paiTotal,(IFNULL(sum(payableAmount),0)- IFNULL(sum(paidAmount),0)) as dueamount')
  		$tutionfees = FeeCol::join('billHistory','stdBill.billNo','=','billHistory.billNo')->select(DB::RAW('billHistory.month, year(stdBill.created_at) as year,sum(stdBill.payableAmount) as payTotal,IFNULL(sum(paidAmount),0) as paiTotal,(IFNULL(sum(payableAmount),0)- IFNULL(sum(paidAmount),0)) as dueamount'))
 							//->where('class',$request->input('class'))
-							->groupBy('month')
+							->groupByRaw('billHistory.month, year(stdBill.created_at)')
 							//->where('regiNo',$request->input('student'))
 							->get();
 			$comabine_array = array();
