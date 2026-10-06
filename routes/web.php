@@ -76,11 +76,11 @@ Route::group(['middleware' => ['web', 'activity']], function () {
     Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth');
     Route::post('/profile', [ProfileController::class, 'update'])->middleware('auth');
 
-    Route::get('/users', [UsersController::class, 'show']);
-    Route::post('/usercreate', [UsersController::class, 'create']);
-    Route::get('/useredit/{id}', [UsersController::class, 'edit']);
-    Route::post('/userupdate', [UsersController::class, 'update']);
-    Route::get('/userdelete/{id}', [UsersController::class, 'delete']);
+    Route::get('/users', [UsersController::class, 'show'])->middleware(['auth','checkPermission:users']);
+    Route::post('/usercreate', [UsersController::class, 'create'])->middleware(['auth','checkPermission:users']);
+    Route::get('/useredit/{id}', [UsersController::class, 'edit'])->middleware(['auth','checkPermission:users']);
+    Route::post('/userupdate', [UsersController::class, 'update'])->middleware(['auth','checkPermission:users']);
+    Route::get('/userdelete/{id}', [UsersController::class, 'delete'])->middleware(['auth','checkPermission:users']);
 });
 
 Route::group(['middleware' => ['auth', 'activity']], function () {
