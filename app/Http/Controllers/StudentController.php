@@ -49,9 +49,14 @@ class StudentController extends BaseController {
 					->select('Student.id', 'Student.regiNo', 'Student.rollNo', 'Student.firstName', 'Student.middleName', 'Student.lastName', 'Student.fatherName', 'Student.motherName', 'Student.fatherCellNo', 'Student.motherCellNo', 'Student.family_id',
 					'Class.Name as class', 'Student.presentAddress', 'Student.gender', 'Student.about_family','section.name')
 					->where('Student.isActive', '=', 'Yes')
-					->groupBy('Student.fatherCellNo')
-					->groupBy('Student.family_id')
-					//->having('Student.family_id', '<', 3)
+					->whereIn('Student.id', function ($query) {
+						$query->selectRaw('MIN(id)')
+							->from('Student')
+							->where('isActive', '=', 'Yes')
+							->groupBy('fatherCellNo', 'family_id');
+					})
+					// Select one representative student per family without relying on MySQL's
+					// disabled/nonportable ONLY_FULL_GROUP_BY behavior.
 					->get();
 		//return View::Make('app.studentCreate',compact('classes'));
 		return View('app.studentCreate',compact('classes','section','families','family_id'));
