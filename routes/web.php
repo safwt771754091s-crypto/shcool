@@ -61,6 +61,10 @@ Route::group(['middleware' => ['web', 'activity']], function () {
     Route::post('/users/code_check', [UsersController::class, 'code_check']);
     Route::get('/branches', [InstituteController::class, 'branches']);
     Route::post('/branch', [InstituteController::class, 'createbranch']);
+
+    // School/institute profile routes. These were referenced by the admin menu but missing.
+    Route::get('/institute', [InstituteController::class, 'index']);
+    Route::post('/institute', [InstituteController::class, 'save']);
     Route::get('/attendance/today_delete', [AttendanceController::class, 'today_delete']);
     Route::get('/verify_code', [UsersController::class, 'verify_code']);
     Route::post('/verified', [UsersController::class, 'verified']);
