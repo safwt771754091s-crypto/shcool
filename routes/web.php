@@ -56,20 +56,6 @@ Route::group(['middleware' => ['web', 'activity']], function () {
     Route::get('/register', [UsersController::class, 'showRegistration'])->name('register');
     Route::post('/register', [UsersController::class, 'register']);
     Route::get('/dashboard/', [DashboardController::class, 'index']);
-    Route::get('/__dashboard_diagnostic', function (\Illuminate\Http\Request $request) {
-        try {
-            return app(\App\Http\Controllers\DashboardController::class)->index($request);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'ok' => false,
-                'exception' => get_class($e),
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => array_slice($e->getTrace(), 0, 8),
-            ], 500);
-        }
-    });
     Route::post('/users/login', [UsersController::class, 'postSignin']);
     Route::get('/verification_code', [UsersController::class, 'codeverify']);
     Route::post('/users/code_check', [UsersController::class, 'code_check']);
