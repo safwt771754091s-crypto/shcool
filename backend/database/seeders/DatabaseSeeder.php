@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             SportsLeagueSeeder::class,
             InteractiveActivitySeeder::class,
             MiniAppSeeder::class,
+            PeopleSeeder::class,
+            AcademicRecordsSeeder::class,
         ]);
     }
 }

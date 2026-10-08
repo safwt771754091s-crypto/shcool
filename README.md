@@ -185,7 +185,80 @@ php artisan test
 
 ---
 
+## المرحلة الثالثة (الطلاب والمعلمون والحضور والدرجات ومزامنة العمل دون إنترنت)
+
+### الطلاب والقبول
+
+- `students` — الملف الشخصي، الشعبة، الرقم الأكاديمي (فريد داخل المدرسة)، والحالة
+  (`applicant` / `enrolled` / `graduated` / `withdrawn` / `transferred`).
+- `admissions` — طلبات القبول بدورة حياة: `submitted` ← (`accepted` | `rejected`) ← `enrolled`.
+- `StudentService` يدير التسجيل، القبول، النقل بين الشعب، وربط أولياء الأمور.
+
+### أولياء الأمور
+
+- `guardians` — بيانات ولي الأمر وربطه بحساب مستخدم.
+- جدول ربط `guardian_student` مع نوع العلاقة و`is_primary`.
+- بوابة ولي الأمر: `GET /students/my-children` يعيد أبناءه فقط.
+
+### المعلمون والتوزيع
+
+- `teachers` — الملف الوظيفي (الرقم الوظيفي، التخصص، المؤهل، الحالة).
+- `teaching_assignments` — توزيع المعلم على (مادة + شعبة + سنة) مع عدد الحصص الأسبوعية.
+- بوابة المعلم: `GET /teachers/my-assignments`.
+
+### الحضور والغياب
+
+- `attendance_sessions` (شعبة + تاريخ + فترة) و`attendances` (صف لكل طالب).
+- `AttendanceService`:
+  - `takeRegister` — أخذ الحضور (upsert، لا تكرار عند إعادة التسجيل).
+  - `sectionReport` — ملخّص لكل طالب (حضور/غياب/تأخير/إذن + النسبة).
+  - `absenceAlerts` — الطلاب الذين تجاوز غيابهم حدّاً معيّناً.
+
+### الاختبارات والدرجات وكشوف النتائج
+
+- `exams` — الاختبارات (يومي/شهري/نصفي/نهائي/قصير) مع الدرجة العظمى والنجاح والوزن.
+- `grades` — الدرجات (صف لكل طالب/اختبار) مع دعم الغياب.
+- `GradeService`:
+  - `record` / `recordMany` — رصد فردي أو جماعي مع التحقق من الدرجة العظمى.
+  - `resultSheet` — كشف نتائج الطالب (معدل موزون لكل مادة + المعدل العام).
+  - `sectionResultSheet` — كشف الشعبة مرتّباً بالرتبة.
+
+### مزامنة العمل دون إنترنت (Offline Sync)
+
+- `sync_batches` — دفعة تغييرات من الجهاز (`client_batch_id` فريد).
+- `POST /api/v1/sync/push` يعيد تشغيل دفعة تغييرات حصلت دون اتصال.
+- **متكرّر الأمان (Idempotent):** إعادة إرسال نفس `client_batch_id` تُرجع النتيجة المخزّنة دون تطبيق مرّتين.
+- كل عنصر يُطبَّق داخل نقطة حفظ مستقلة؛ فشل عنصر لا يُلغي بقية الدفعة (تُصنَّف الدفعة `partial`).
+- الأنواع المدعومة حالياً: `attendance.register`, `grade.record`.
+
+### واجهات المرحلة الثالثة
+
+| الطريقة | المسار | الوصف |
+|---------|--------|-------|
+| `GET/POST` | `/api/v1/students` | الطلاب |
+| `GET/PUT` | `/api/v1/students/{student}` | ملف الطالب |
+| `POST` | `/api/v1/students/{student}/transfer` \| `status` | النقل وتغيير الحالة |
+| `GET` | `/api/v1/students/my-children` | أبناء ولي الأمر |
+| `GET/POST` | `/api/v1/admissions` | طلبات القبول |
+| `POST` | `/api/v1/admissions/{id}/decide` \| `enrol` | القرار والتسجيل |
+| `GET/POST` | `/api/v1/guardians` | أولياء الأمور |
+| `POST` | `/api/v1/guardians/{id}/link` | ربط ولي الأمر بطالب |
+| `GET/POST` | `/api/v1/teachers` | المعلمون |
+| `POST` | `/api/v1/teachers/{id}/assign` | التوزيع على مادة/شعبة |
+| `GET` | `/api/v1/teachers/my-assignments` | مهام المعلم |
+| `POST` | `/api/v1/attendance/register` | أخذ الحضور |
+| `GET` | `/api/v1/attendance/session` | سجلّ الحضور ليوم |
+| `GET` | `/api/v1/attendance/report` | تقرير الحضور |
+| `GET` | `/api/v1/attendance/absence-alerts` | تنبيهات الغياب |
+| `GET/POST` | `/api/v1/exams` | الاختبارات |
+| `POST` | `/api/v1/exams/{id}/grades` \| `publish` | رصد ونشر الدرجات |
+| `GET` | `/api/v1/exams/result-sheet` | كشف نتائج الشعبة |
+| `GET` | `/api/v1/students/{id}/result-sheet` | كشف نتائج طالب |
+| `GET` | `/api/v1/exams/my-result` | كشف نتائج الطالب الحالي |
+| `POST` | `/api/v1/sync/push` | مزامنة تغييرات العمل دون إنترنت |
+
+---
+
 ## الخطوات التالية
 
-- **المرحلة الثالثة:** APIs تطبيق Flutter ومزامنة العمل دون إنترنت (Offline Sync).
-- **المرحلة الرابعة:** الإشعارات (SMS/WhatsApp)، التقارير، البوابات الخارجية.
+- **المرحلة الرابعة:** الإشعارات (SMS/WhatsApp)، التقارير والتصدير، البوابات الخارجية.

@@ -29,13 +29,23 @@ class TenantManager
 
     public function __construct(
         protected TenantResolver $resolver,
-    ) {
-    }
+    ) {}
 
     public function setTenant(?Organization $tenant): void
     {
         $this->tenant = $tenant;
         $this->resolved = true;
+    }
+
+    /**
+     * Drop the cached resolution so the tenant is resolved again on next use.
+     * Called at the start of each request: the tenant can only be known once
+     * the auth middleware has run, which happens after InitializeTenancy.
+     */
+    public function forget(): void
+    {
+        $this->tenant = null;
+        $this->resolved = false;
     }
 
     public function setTenantId(int|string|null $tenantId): void

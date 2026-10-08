@@ -14,13 +14,14 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class InitializeTenancy
 {
-    public function __construct(protected TenantManager $tenants)
-    {
-    }
+    public function __construct(protected TenantManager $tenants) {}
 
     public function handle(Request $request, Closure $next): Response
     {
-        $this->tenants->setTenant($this->tenants->tenant());
+        // This middleware runs before `auth:sanctum`, so the user (and therefore
+        // the tenant) is not known yet. Clear any cached resolution and let the
+        // first tenant-scoped query resolve it lazily, after auth has run.
+        $this->tenants->forget();
 
         try {
             return $next($request);

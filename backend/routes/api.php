@@ -2,11 +2,17 @@
 
 use App\Http\Controllers\Api\AcademicController;
 use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ExamController;
+use App\Http\Controllers\Api\GuardianController;
 use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\MiniAppController;
 use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\SportsLeagueController;
+use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\SyncController;
+use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\TeachingController;
 use App\Http\Controllers\Api\TwoFactorController;
 use Illuminate\Support\Facades\Route;
@@ -135,6 +141,89 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware('permission:apps.view');
             Route::post('apps/{app}/publish', [MiniAppController::class, 'publish'])
                 ->middleware('permission:apps.publish');
+
+            // ---- Students & admissions --------------------------------
+            Route::get('students', [StudentController::class, 'index'])
+                ->middleware('permission:students.view');
+            Route::post('students', [StudentController::class, 'store'])
+                ->middleware('permission:students.create');
+            Route::get('students/my-children', [StudentController::class, 'myChildren'])
+                ->middleware('permission:students.view-profile');
+            Route::get('students/{student}', [StudentController::class, 'show'])
+                ->middleware('permission:students.view');
+            Route::put('students/{student}', [StudentController::class, 'update'])
+                ->middleware('permission:students.update');
+            Route::post('students/{student}/transfer', [StudentController::class, 'transfer'])
+                ->middleware('permission:students.promote');
+            Route::post('students/{student}/status', [StudentController::class, 'changeStatus'])
+                ->middleware('permission:students.update');
+
+            Route::get('admissions', [StudentController::class, 'admissions'])
+                ->middleware('permission:students.view');
+            Route::post('admissions', [StudentController::class, 'storeAdmission'])
+                ->middleware('permission:students.create');
+            Route::post('admissions/{admission}/decide', [StudentController::class, 'decideAdmission'])
+                ->middleware('permission:students.update');
+            Route::post('admissions/{admission}/enrol', [StudentController::class, 'enrolAdmission'])
+                ->middleware('permission:students.create');
+
+            // ---- Guardians / parents ----------------------------------
+            Route::get('guardians', [GuardianController::class, 'index'])
+                ->middleware('permission:parents.view');
+            Route::post('guardians', [GuardianController::class, 'store'])
+                ->middleware('permission:parents.create');
+            Route::get('guardians/{guardian}', [GuardianController::class, 'show'])
+                ->middleware('permission:parents.view');
+            Route::put('guardians/{guardian}', [GuardianController::class, 'update'])
+                ->middleware('permission:parents.update');
+            Route::post('guardians/{guardian}/link', [GuardianController::class, 'link'])
+                ->middleware('permission:parents.link-students');
+
+            // ---- Teachers & assignments -------------------------------
+            Route::get('teachers', [TeacherController::class, 'index'])
+                ->middleware('permission:teachers.view');
+            Route::post('teachers', [TeacherController::class, 'store'])
+                ->middleware('permission:teachers.create');
+            Route::get('teachers/my-assignments', [TeacherController::class, 'myAssignments'])
+                ->middleware('permission:teachers.view');
+            Route::get('teachers/{teacher}', [TeacherController::class, 'show'])
+                ->middleware('permission:teachers.view');
+            Route::put('teachers/{teacher}', [TeacherController::class, 'update'])
+                ->middleware('permission:teachers.update');
+            Route::post('teachers/{teacher}/assign', [TeacherController::class, 'assign'])
+                ->middleware('permission:teachers.assign');
+
+            // ---- Attendance -------------------------------------------
+            Route::post('attendance/register', [AttendanceController::class, 'takeRegister'])
+                ->middleware('permission:attendance.create');
+            Route::get('attendance/session', [AttendanceController::class, 'session'])
+                ->middleware('permission:attendance.view');
+            Route::get('attendance/report', [AttendanceController::class, 'report'])
+                ->middleware('permission:attendance.report');
+            Route::get('attendance/absence-alerts', [AttendanceController::class, 'absenceAlerts'])
+                ->middleware('permission:attendance.report');
+
+            // ---- Exams & grades ---------------------------------------
+            Route::get('exams', [ExamController::class, 'index'])
+                ->middleware('permission:exams.view');
+            Route::post('exams', [ExamController::class, 'store'])
+                ->middleware('permission:exams.create');
+            Route::get('exams/my-result', [ExamController::class, 'myResultSheet'])
+                ->middleware('permission:exams.view');
+            Route::get('exams/result-sheet', [ExamController::class, 'sectionResultSheet'])
+                ->middleware('permission:exams.view');
+            Route::get('exams/{exam}', [ExamController::class, 'show'])
+                ->middleware('permission:exams.view');
+            Route::post('exams/{exam}/grades', [ExamController::class, 'recordGrades'])
+                ->middleware('permission:exams.grades.enter');
+            Route::post('exams/{exam}/publish', [ExamController::class, 'publish'])
+                ->middleware('permission:exams.grades.publish');
+            Route::get('students/{student}/result-sheet', [ExamController::class, 'resultSheet'])
+                ->middleware('permission:exams.view');
+
+            // ---- Offline sync -----------------------------------------
+            Route::post('sync/push', [SyncController::class, 'push'])
+                ->middleware('permission:attendance.create');
         });
     });
 });
