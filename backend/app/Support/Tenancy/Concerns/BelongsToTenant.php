@@ -20,7 +20,11 @@ trait BelongsToTenant
     public static function bootBelongsToTenant(): void
     {
         static::addGlobalScope(
-            new TenantScope(app(TenantManager::class), static::tenantColumn())
+            new TenantScope(
+                app(TenantManager::class),
+                static::tenantColumn(),
+                static::includesGlobalRows(),
+            )
         );
 
         static::creating(function ($model): void {
@@ -31,6 +35,15 @@ trait BelongsToTenant
     public static function tenantColumn(): string
     {
         return 'tenant_id';
+    }
+
+    /**
+     * Whether the model also holds platform-wide rows (tenant_id IS NULL) that
+     * should remain visible to every tenant. Override in the model when so.
+     */
+    public static function includesGlobalRows(): bool
+    {
+        return false;
     }
 
     public function tenant(): BelongsTo

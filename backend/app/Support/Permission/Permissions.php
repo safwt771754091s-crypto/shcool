@@ -30,6 +30,21 @@ final class Permissions
         'parents' => ['view', 'create', 'update', 'link-students'],
         'settings' => ['view', 'update'],
         'audit' => ['view'],
+
+        // Teaching lifecycle: the curriculum and the preparation notebook.
+        'curriculum' => ['view', 'manage'],
+        'teaching' => ['view', 'prepare', 'submit', 'review', 'approve'],
+        'assignments' => ['view', 'create', 'update', 'delete', 'grade'],
+
+        // Sports league (الدوري الرياضي) and interactive activities.
+        'sports' => ['view', 'manage', 'register', 'schedule', 'record-results'],
+        'activities' => ['view', 'manage', 'submit'],
+
+        // Mini-app registry (سجل التطبيقات المصغّرة).
+        'apps' => ['view', 'manage', 'publish'],
+
+        // Platform ownership: reserved for the owner account.
+        'platform' => ['view', 'manage', 'manage-admins', 'impersonate'],
     ];
 
     /**

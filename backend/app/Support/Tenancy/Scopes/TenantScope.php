@@ -16,11 +16,12 @@ class TenantScope implements Scope
     public function __construct(
         protected TenantManager $tenants,
         protected string $column = 'tenant_id',
+        protected bool $includeGlobal = false,
     ) {
     }
 
     public function apply(Builder $builder, Model $model): void
     {
-        $this->tenants->applyScope($builder, $this->column);
+        $this->tenants->applyScope($builder, $this->column, $this->includeGlobal);
     }
 }

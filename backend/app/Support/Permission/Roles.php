@@ -17,6 +17,9 @@ use App\Models\Organization;
 final class Roles
 {
     // Global roles (level 1-3).
+    /** The platform owner. Distinct from an administrator: owns the product. */
+    public const OWNER = 'owner';
+
     public const SUPER_ADMIN = 'super_admin';
 
     public const MINISTRY_ADMIN = 'ministry_admin';
@@ -52,11 +55,19 @@ final class Roles
     public static function definitions(): array
     {
         return [
-            new RoleDefinition(self::SUPER_ADMIN, 'مدير المنصة', 1, ['*'], global: true),
+            new RoleDefinition(self::OWNER, 'مالك المنصة', 1, ['*'], global: true),
+            new RoleDefinition(self::SUPER_ADMIN, 'مدير المنصة', 1, [
+                'platform.view', 'platform.manage', 'platform.manage-admins', 'platform.impersonate',
+                'organizations.*', 'users.*', 'roles.*', 'reports.*', 'audit.view', 'settings.*',
+                'notifications.*', 'apps.*', 'sports.*', 'activities.*',
+                'students.*', 'teachers.*', 'attendance.*', 'exams.*', 'classes.*',
+            ], global: true),
             new RoleDefinition(self::MINISTRY_ADMIN, 'مدير الوزارة', 1, [
                 'organizations.*', 'users.*', 'roles.view', 'roles.assign',
                 'reports.view', 'reports.export', 'audit.view', 'settings.*',
                 'notifications.*', 'students.view', 'teachers.view',
+                'apps.view', 'apps.publish', 'sports.*', 'activities.*',
+                'curriculum.view', 'teaching.view', 'reports.view',
             ], global: true),
             new RoleDefinition(self::GOVERNORATE_ADMIN, 'مدير المحافظة', 2, [
                 'organizations.view', 'organizations.create', 'organizations.update',
@@ -64,6 +75,8 @@ final class Roles
                 'roles.view', 'roles.assign', 'reports.view', 'reports.export',
                 'students.view', 'teachers.view', 'attendance.report',
                 'exams.view', 'fees.view',
+                'apps.view', 'apps.publish', 'sports.view', 'sports.schedule',
+                'activities.view',
             ], global: true),
             new RoleDefinition(self::DIRECTORATE_ADMIN, 'مدير المديرية', 3, [
                 'organizations.view', 'organizations.update',
@@ -71,6 +84,8 @@ final class Roles
                 'roles.view', 'roles.assign', 'reports.view', 'reports.export',
                 'students.*', 'teachers.*', 'attendance.*', 'exams.*',
                 'fees.view', 'classes.view',
+                'apps.view', 'apps.publish', 'sports.*', 'activities.*',
+                'curriculum.view', 'teaching.view', 'teaching.review',
             ], global: true),
 
             new RoleDefinition(self::SCHOOL_MANAGER, 'مدير المدرسة', 4, ['*']),
@@ -80,20 +95,28 @@ final class Roles
                 'sessions.view', 'attendance.*', 'exams.*',
                 'fees.*', 'invoices.*', 'payments.*',
                 'reports.view', 'reports.export', 'notifications.view', 'notifications.send',
+                'curriculum.*', 'teaching.*', 'assignments.*',
+                'sports.*', 'activities.*', 'apps.view', 'apps.publish',
             ]),
             new RoleDefinition(self::VICE_PRINCIPAL, 'وكيل المدرسة', 4, [
                 'students.*', 'teachers.view', 'classes.*', 'subjects.view',
                 'sessions.view', 'attendance.*', 'exams.*', 'reports.view',
                 'notifications.view', 'notifications.send', 'parents.view',
+                'curriculum.*', 'teaching.view', 'teaching.review', 'teaching.approve',
+                'assignments.view', 'sports.view', 'sports.manage', 'activities.*',
             ]),
             new RoleDefinition(self::TEACHER, 'معلم', 4, [
                 'students.view', 'students.view-profile', 'classes.view',
                 'subjects.view', 'attendance.view', 'attendance.create', 'attendance.update',
                 'exams.view', 'exams.grades.enter', 'reports.view',
+                'curriculum.view', 'teaching.view', 'teaching.prepare', 'teaching.submit',
+                'assignments.view', 'assignments.create', 'assignments.update', 'assignments.grade',
+                'sports.view', 'activities.view', 'activities.manage',
             ]),
             new RoleDefinition(self::TEACHER_ASSISTANT, 'معلم مساعد', 4, [
                 'students.view', 'classes.view', 'subjects.view',
                 'attendance.view', 'exams.view', 'exams.grades.enter',
+                'curriculum.view', 'teaching.view', 'assignments.view', 'activities.view',
             ]),
             new RoleDefinition(self::STUDENT_AFFAIRS, 'شؤون الطلاب', 4, [
                 'students.*', 'classes.view', 'attendance.*', 'reports.view',
@@ -109,9 +132,11 @@ final class Roles
             new RoleDefinition(self::PARENT, 'ولي أمر', 4, [
                 'students.view-profile', 'exams.view', 'attendance.view',
                 'fees.view', 'invoices.view', 'payments.view', 'reports.view',
+                'teaching.view', 'assignments.view', 'activities.view', 'sports.view',
             ]),
             new RoleDefinition(self::STUDENT, 'طالب', 4, [
                 'exams.view', 'attendance.view', 'fees.view', 'invoices.view',
+                'assignments.view', 'activities.view', 'activities.submit', 'sports.view',
             ]),
         ];
     }

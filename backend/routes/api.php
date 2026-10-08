@@ -1,8 +1,13 @@
 <?php
 
+use App\Http\Controllers\Api\AcademicController;
+use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\LeaderboardController;
+use App\Http\Controllers\Api\MiniAppController;
 use App\Http\Controllers\Api\OrganizationController;
+use App\Http\Controllers\Api\SportsLeagueController;
+use App\Http\Controllers\Api\TeachingController;
 use App\Http\Controllers\Api\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,6 +58,83 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware('permission:reports.view');
             Route::post('ranking-periods/{period}/recompute', [LeaderboardController::class, 'recompute'])
                 ->middleware('permission:reports.export');
+
+            // ---- Academic structure -----------------------------------
+            Route::get('academic/years', [AcademicController::class, 'years'])
+                ->middleware('permission:classes.view');
+            Route::post('academic/years', [AcademicController::class, 'storeYear'])
+                ->middleware('permission:sessions.create');
+            Route::post('academic/years/{year}/terms', [AcademicController::class, 'storeTerm'])
+                ->middleware('permission:sessions.create');
+
+            Route::get('academic/subjects', [AcademicController::class, 'subjects'])
+                ->middleware('permission:subjects.view');
+            Route::post('academic/subjects', [AcademicController::class, 'storeSubject'])
+                ->middleware('permission:subjects.create');
+
+            Route::get('academic/classes', [AcademicController::class, 'classes'])
+                ->middleware('permission:classes.view');
+            Route::post('academic/classes', [AcademicController::class, 'storeClass'])
+                ->middleware('permission:classes.create');
+            Route::post('academic/classes/{class}/sections', [AcademicController::class, 'storeSection'])
+                ->middleware('permission:classes.create');
+
+            Route::get('academic/units', [AcademicController::class, 'units'])
+                ->middleware('permission:curriculum.view');
+            Route::post('academic/units', [AcademicController::class, 'storeUnit'])
+                ->middleware('permission:curriculum.manage');
+            Route::post('academic/units/{unit}/lessons', [AcademicController::class, 'storeLesson'])
+                ->middleware('permission:curriculum.manage');
+
+            // ---- Teaching / preparation notebook ----------------------
+            Route::get('teaching/preparations', [TeachingController::class, 'index'])
+                ->middleware('permission:teaching.view');
+            Route::post('teaching/preparations', [TeachingController::class, 'store'])
+                ->middleware('permission:teaching.prepare');
+            Route::put('teaching/preparations/{preparation}', [TeachingController::class, 'update'])
+                ->middleware('permission:teaching.prepare');
+            Route::post('teaching/preparations/{preparation}/submit', [TeachingController::class, 'submit'])
+                ->middleware('permission:teaching.submit');
+            Route::post('teaching/preparations/{preparation}/review', [TeachingController::class, 'review'])
+                ->middleware('permission:teaching.review');
+
+            // ---- Sports league ----------------------------------------
+            Route::get('sports/competitions', [SportsLeagueController::class, 'index'])
+                ->middleware('permission:sports.view');
+            Route::post('sports/competitions', [SportsLeagueController::class, 'store'])
+                ->middleware('permission:sports.manage');
+            Route::get('sports/competitions/{competition}', [SportsLeagueController::class, 'show'])
+                ->middleware('permission:sports.view');
+            Route::post('sports/competitions/{competition}/participants', [SportsLeagueController::class, 'registerParticipant'])
+                ->middleware('permission:sports.register');
+            Route::post('sports/competitions/{competition}/bracket', [SportsLeagueController::class, 'generateBracket'])
+                ->middleware('permission:sports.schedule');
+            Route::post('sports/competitions/{competition}/advance', [SportsLeagueController::class, 'advance'])
+                ->middleware('permission:sports.schedule');
+            Route::post('sports/matches/{match}/result', [SportsLeagueController::class, 'recordResult'])
+                ->middleware('permission:sports.record-results');
+
+            // ---- Interactive activities -------------------------------
+            Route::get('activities', [ActivityController::class, 'index'])
+                ->middleware('permission:activities.view');
+            Route::post('activities', [ActivityController::class, 'store'])
+                ->middleware('permission:activities.manage');
+            Route::get('activities/my-results', [ActivityController::class, 'myResults'])
+                ->middleware('permission:activities.view');
+            Route::get('activities/{activity}', [ActivityController::class, 'show'])
+                ->middleware('permission:activities.view');
+            Route::post('activities/{activity}/submit', [ActivityController::class, 'submit'])
+                ->middleware('permission:activities.submit');
+
+            // ---- Mini-app registry ------------------------------------
+            Route::get('apps', [MiniAppController::class, 'index'])
+                ->middleware('permission:apps.view');
+            Route::post('apps', [MiniAppController::class, 'store'])
+                ->middleware('permission:apps.manage');
+            Route::get('apps/available', [MiniAppController::class, 'available'])
+                ->middleware('permission:apps.view');
+            Route::post('apps/{app}/publish', [MiniAppController::class, 'publish'])
+                ->middleware('permission:apps.publish');
         });
     });
 });

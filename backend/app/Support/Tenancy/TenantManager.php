@@ -102,16 +102,27 @@ class TenantManager
 
     /**
      * Apply the tenant constraint to a query. Called by the global scope.
+     *
+     * When `$includeGlobal` is true the model may also hold platform-wide rows
+     * (tenant_id IS NULL) — ministry cups, national activity templates, app
+     * templates — and those stay visible to every tenant.
      */
-    public function applyScope(Builder $builder, string $column = 'tenant_id'): void
+    public function applyScope(Builder $builder, string $column = 'tenant_id', bool $includeGlobal = false): void
     {
         if ($this->isBypassed()) {
             return;
         }
 
+        $qualified = $builder->getModel()->qualifyColumn($column);
         $tenantId = $this->tenantId();
 
         if ($tenantId === null) {
+            if ($includeGlobal) {
+                $builder->whereNull($qualified);
+
+                return;
+            }
+
             if (config('tenancy.strict')) {
                 throw TenantNotResolvedException::forModel($builder->getModel()::class);
             }
@@ -122,7 +133,15 @@ class TenantManager
             return;
         }
 
-        $builder->where($builder->getModel()->qualifyColumn($column), $tenantId);
+        if ($includeGlobal) {
+            $builder->where(
+                fn (Builder $q) => $q->where($qualified, $tenantId)->orWhereNull($qualified)
+            );
+
+            return;
+        }
+
+        $builder->where($qualified, $tenantId);
     }
 
     public function tenantModel(): string

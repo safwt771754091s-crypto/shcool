@@ -67,6 +67,7 @@ php artisan serve
 
 | الحساب | كلمة المرور | الدور |
 |--------|-------------|-------|
+| `owner@school-platform.local` | `password` | مالك المنصة (Owner) |
 | `admin@school-platform.local` | `password` | مدير المنصة (Super Admin) |
 | `manager@school-platform.local` | `password` | مدير مدرسة |
 
@@ -79,7 +80,7 @@ cd backend
 php artisan test
 ```
 
-تُشغَّل على SQLite في الذاكرة، وتغطّي: العزل بين المستأجرين، المصادقة، 2FA، الأدوار والصلاحيات، سجلّ التدقيق، ولوحة التصنيف.
+تُشغَّل على SQLite في الذاكرة (42 اختباراً، 115 تأكيداً)، وتغطّي: العزل بين المستأجرين، المصادقة، 2FA، الأدوار والصلاحيات، سجلّ التدقيق، لوحة التصنيف، كراسة التحضير، الدوري الرياضي، الأنشطة التفاعلية، وسجلّ التطبيقات.
 
 ---
 
@@ -116,8 +117,75 @@ php artisan test
 
 ---
 
+## المرحلة الثانية (الهيكل الأكاديمي والتدريس والتنافس الموسّع)
+
+### الهيكل الأكاديمي والتدريس
+
+- `academic_years` + `terms` — السنوات والفصول الدراسية، مع `is_current`.
+- `subjects` — المواد.
+- `school_classes` + `class_sections` — الصفوف والشعب (مع سعة القاعة والمعلّم المسؤول).
+- `curriculum_units` + `lessons` — شجرة المنهج (وحدة ← درس).
+- `lesson_preparations` — **كراسة تحضير المعلمين** مع دورة حياة كاملة:
+  `draft` ← `submitted` ← (`approved` | `returned`)، وسجلّ من راجع التحضير ومتى.
+- `assignments` — الواجبات.
+
+### الدوري الرياضي (Sports League)
+
+محرّك بطولات تصفيات منفردة يصعد **سلّم المنافسة**:
+
+```
+شعب ← صفوف ← مدارس ← مديريات (مراكز التربية) ← محافظات ← نهائي الوزارة
+```
+
+- يُولَّد جدول التصفيات تلقائياً لكل رتبة (`SportsLeagueService::generateBracket`).
+- عدد الفرق الفردي يُعالَج بمنح أحد الفريقين «تأهيلاً مباشراً» (bye).
+- تسجيل النتيجة (`recordResult`) يدفع الفائز تلقائياً إلى مباراة الجولة التالية.
+- `promoteWinners` يرقّي فائزي الرتبة الحالية إلى الرتبة التالية حتى النهائي الوطني.
+
+### الأنشطة التفاعلية (للابتدائي)
+
+- `interactive_activities` + `activity_questions` + `activity_attempts`.
+- المجالات: `english` / `math` / `activities`.
+- التصحيح يجري **على الخادم** (`ActivityService`)؛ العميل لا يصحّح ولا يعتمد عليه.
+
+### سجلّ التطبيقات المصغّرة (Mini-Apps)
+
+- `mini_apps` — قوالب التطبيقات، و`mini_app_instances` — نسخة كل جهة.
+- لكل مدرسة تطبيقها، والمديرية تجمع مدارسها، والمحافظة تجمع مديرياتها، والوزارة تجمع الجميع.
+- المدرسة **ترث** تلقائياً تطبيقات أسلافها (`MiniAppService::availableFor`).
+
+### الأدوار الجديدة
+
+- **Owner (مالك المنصة)** — أعلى سلطة على المنتج نفسه، منفصل عن مدير المنصة.
+- صلاحيات جديدة: `curriculum.*`, `teaching.*`, `assignments.*`, `sports.*`, `activities.*`, `apps.*`, `platform.*`.
+
+### واجهات المرحلة الثانية
+
+| الطريقة | المسار | الوصف |
+|---------|--------|-------|
+| `GET/POST` | `/api/v1/academic/years` | السنوات الدراسية |
+| `POST` | `/api/v1/academic/years/{year}/terms` | الفصول الدراسية |
+| `GET/POST` | `/api/v1/academic/subjects` | المواد |
+| `GET/POST` | `/api/v1/academic/classes` | الصفوف |
+| `POST` | `/api/v1/academic/classes/{class}/sections` | الشعب |
+| `GET/POST` | `/api/v1/academic/units` | وحدات المنهج |
+| `POST` | `/api/v1/academic/units/{unit}/lessons` | الدروس |
+| `GET/POST` | `/api/v1/teaching/preparations` | كراسة التحضير |
+| `POST` | `/api/v1/teaching/preparations/{id}/submit` \| `review` | الإرسال والمراجعة |
+| `GET/POST` | `/api/v1/sports/competitions` | الدوريات |
+| `POST` | `/api/v1/sports/competitions/{id}/participants` | تسجيل فريق |
+| `POST` | `/api/v1/sports/competitions/{id}/bracket` \| `advance` | توليد الجدول والترقية |
+| `POST` | `/api/v1/sports/matches/{id}/result` | تسجيل نتيجة |
+| `GET/POST` | `/api/v1/activities` | الأنشطة التفاعلية |
+| `POST` | `/api/v1/activities/{id}/submit` | إرسال إجابات الطالب |
+| `GET` | `/api/v1/activities/my-results` | نتائجي |
+| `GET/POST` | `/api/v1/apps` | سجلّ التطبيقات |
+| `POST` | `/api/v1/apps/{id}/publish` | نشر تطبيق على جهة |
+| `GET` | `/api/v1/apps/available` | تطبيقاتي المتاحة |
+
+---
+
 ## الخطوات التالية
 
-- **المرحلة الثانية:** الطلاب، المعلمون، الفصول، الحضور، الدرجات.
-- **المرحلة الثالثة:** APIs تطبيق Flutter ومزامنة العمل دون إنترنت.
+- **المرحلة الثالثة:** APIs تطبيق Flutter ومزامنة العمل دون إنترنت (Offline Sync).
 - **المرحلة الرابعة:** الإشعارات (SMS/WhatsApp)، التقارير، البوابات الخارجية.

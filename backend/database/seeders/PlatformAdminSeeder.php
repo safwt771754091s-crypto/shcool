@@ -17,6 +17,19 @@ class PlatformAdminSeeder extends Seeder
         // Global roles live in the reserved global team.
         $registrar->setPermissionsTeamId(GlobalTeam::ID);
 
+        $owner = User::query()->updateOrCreate(
+            ['email' => 'owner@school-platform.local'],
+            [
+                'name' => 'مالك المنصة',
+                'password' => Hash::make('password'),
+                'is_active' => true,
+                'is_platform_admin' => true,
+                'email_verified_at' => now(),
+            ],
+        );
+
+        $owner->assignRole(Roles::OWNER);
+
         $admin = User::query()->updateOrCreate(
             ['email' => 'admin@school-platform.local'],
             [
@@ -53,6 +66,6 @@ class PlatformAdminSeeder extends Seeder
 
         $registrar->setPermissionsTeamId(GlobalTeam::ID);
 
-        $this->command?->info('Platform admin and sample school manager created.');
+        $this->command?->info('Platform owner, admin and sample school manager created.');
     }
 }
