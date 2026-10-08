@@ -1,0 +1,7 @@
+# Agent scratch / memory (never versioned)
+.openhands/
+.agent_tmp/
+
+# OS noise
+.DS_Store
+Thumbs.db
