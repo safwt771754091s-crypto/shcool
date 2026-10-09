@@ -220,7 +220,7 @@ Route::prefix('v1')->group(function (): void {
             Route::post('teachers', [TeacherController::class, 'store'])
                 ->middleware('permission:teachers.create');
             Route::get('teachers/my-assignments', [TeacherController::class, 'myAssignments'])
-                ->middleware('permission:teachers.view');
+                ->middleware('permission:teachers.my-assignments');
             Route::get('teachers/dashboard', [TeacherDashboardController::class, 'show'])
                 ->middleware('permission:teachers.my-assignments');
             Route::get('teachers/{teacher}', [TeacherController::class, 'show'])

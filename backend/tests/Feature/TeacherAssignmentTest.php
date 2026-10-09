@@ -7,7 +7,12 @@ use App\Models\Academic\Subject;
 use App\Models\Organization;
 use App\Models\Staff\Teacher;
 use App\Models\Staff\TeachingAssignment;
+use App\Models\User;
+use App\Support\Permission\RoleProvisioner;
+use App\Support\Permission\Roles;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class TeacherAssignmentTest extends TestCase
@@ -55,5 +60,43 @@ class TeacherAssignmentTest extends TestCase
 
         Teacher::create(['employee_number' => 'T-0001', 'full_name' => 'معلم ب']);
         $this->assertSame(1, Teacher::query()->count());
+    }
+
+    public function test_teacher_can_list_their_own_assignments(): void
+    {
+        $this->seed(PermissionSeeder::class);
+
+        $school = Organization::factory()->tenant()->create();
+        $this->actingAsTenant($school);
+
+        app(RoleProvisioner::class)->provisionTenantRoles($school);
+
+        $user = User::factory()->create(['tenant_id' => $school->id]);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($school->id);
+        $user->assignRole(Roles::TEACHER);
+
+        $class = SchoolClass::create(['name' => 'الصف الأول', 'grade' => 1]);
+        $section = $class->sections()->create(['name' => 'أ']);
+        $subject = Subject::create(['name' => 'الرياضيات', 'code' => 'MATH']);
+
+        $teacher = Teacher::create([
+            'employee_number' => 'T-0001',
+            'full_name' => 'أحمد الجبوري',
+            'user_id' => $user->id,
+        ]);
+
+        TeachingAssignment::create([
+            'teacher_id' => $teacher->getKey(),
+            'subject_id' => $subject->getKey(),
+            'class_section_id' => $section->getKey(),
+            'weekly_periods' => 5,
+        ]);
+
+        $token = $user->createToken('test')->plainTextToken;
+
+        $this->withToken($token)
+            ->getJson('/api/v1/teachers/my-assignments')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
     }
 }
