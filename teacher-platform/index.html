@@ -50,7 +50,7 @@ await searchLessonImages(title,keywords);
 function simpleExplanation(s){let x=s.replace(/^(?:تعريف|ملاحظة|مثال|أولاً|ثانياً|ثالثاً)[:：\s-]*/,'').trim();if(x.length>170)x=x.slice(0,167)+'…';return 'بمعنى مبسط: '+x}
 function questionFromPoint(s,i){let x=s.length>150?s.slice(0,147)+'…':s;return 'ماذا تفهم من الفكرة التالية؟ «'+x+'»'}
 async function loadScriptOnce(src,test){if(test())return;await new Promise((resolve,reject)=>{let sc=document.createElement('script');sc.src=src;sc.onload=resolve;sc.onerror=()=>reject(new Error('تعذر تحميل أداة قراءة الملف'));document.head.appendChild(sc)})}
-async function extractBookContent(){
+async async function extractBookContent(){
 const file=$('bookFile').files[0];if(!file){alert('اختر ملف PDF أو صورة من الكتاب أولاً.');return}
 const status=$('extractStatus');const box=$('sourceLesson');box.value='';status.textContent='جارٍ قراءة الملف…';
 try{
@@ -69,7 +69,7 @@ await loadScriptOnce('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract
 text=text.replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();if(text.length<20)throw new Error('لم أستطع قراءة نص كافٍ. جرّب صورة أوضح أو PDF نصي.');box.value=text;status.textContent='نجح استخراج '+text.length+' حرفاً. اكتب عنوان الدرس ثم اضغط «إنشاء تحضير من محتوى الدرس».'
 }catch(e){status.textContent='تعذر استخراج النص: '+e.message;alert(status.textContent)}
 }
-async function searchLessonImages(title,keywords){
+async async function searchLessonImages(title,keywords){
 const target=$('lessonImages');if(!target)return;target.innerHTML='<p class="muted">جارٍ البحث عن صور توضيحية…</p>';
 const queries=[title,...keywords.slice(0,2)].filter(Boolean);let found=[],seen=new Set();
 try{for(const q of queries){const url='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(q)+'&gsrnamespace=6&gsrlimit=3&prop=imageinfo&iiprop=url%7Cextmetadata&iiurlwidth=640&format=json&origin=*';const res=await fetch(url);if(!res.ok)continue;const data=await res.json();for(const page of Object.values(data.query?.pages||{})){const info=page.imageinfo?.[0];const thumb=info?.thumburl||info?.url;if(!thumb||seen.has(thumb)||!(/\.(jpg|jpeg|png|webp)$/i.test(thumb)))continue;seen.add(thumb);found.push({title:page.title.replace(/^File:/,''),url:thumb,source:info.descriptionurl||info.url});if(found.length>=6)break}if(found.length>=6)break}
