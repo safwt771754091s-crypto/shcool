@@ -2,9 +2,12 @@
 
 منصة وطنية لإدارة المدارس: الويب وتطبيق أندرويد يستهلكان واجهة برمجية واحدة.
 
-- **الباك اند:** Laravel (API) + MySQL + Redis + Laravel Sanctum
-- **الواجهات:** Flutter (ويب + جوال) تستهلك نفس الـ API
+- **الباك اند:** Laravel (API) + MySQL + Redis + Laravel Sanctum — في `backend/`
+- **الواجهات:** Flutter (ويب + جوال) تستهلك نفس الـ API — في `mobile/`
 - **العزل:** Multi-tenant عبر `tenant_id` مع Global Scopes — كل مدرسة معزولة تماماً
+
+> تطبيق Flutter (Android + Web): انظر [`mobile/README.md`](mobile/README.md) — يشمل تسجيل الدخول،
+> التحقق بخطوتين، لوحة المعلم، بوابة ولي الأمر، بوابة الطالب، والعمل دون إنترنت (Offline Sync).
 
 ---
 
