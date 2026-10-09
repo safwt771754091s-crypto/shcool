@@ -47,3 +47,17 @@ jobs:
               sys.exit(1)
           print(f"PASS: entry point exists ({page.stat().st_size} bytes)")
           PY
+
+      - name: Check inline JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          html = Path("teacher-platform/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script(?![^>]*\\bsrc=)[^>]*>(.*?)</script>", html, re.S | re.I)
+          if not scripts:
+              raise SystemExit("FAIL: no inline application script found")
+          Path("/tmp/teacher-platform-inline.js").write_text("\\n".join(scripts), encoding="utf-8")
+          print(f"Extracted {len(scripts)} inline script(s)")
+          PY
+          node --check /tmp/teacher-platform-inline.js
