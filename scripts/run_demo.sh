@@ -7,6 +7,10 @@
 # Idempotent: safe to re-run. Logs go to /tmp/school_*.log.
 set -u
 
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH:-}"
+SUDO=""
+[ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1 && SUDO="sudo"
+
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND="$REPO_DIR/backend"
 MOBILE="$REPO_DIR/mobile"
@@ -16,11 +20,11 @@ WEB_PORT="${WEB_PORT:-12001}"
 API_PUBLIC="${API_PUBLIC:-https://work-1-qgkkdtekkcsslwlv.prod-runtime.all-hands.dev}"
 
 echo "==> Ensuring services"
-service mariadb status >/dev/null 2>&1 || service mariadb start >/dev/null 2>&1
-redis-cli ping >/dev/null 2>&1 || service redis-server start >/dev/null 2>&1
+$SUDO service mariadb status >/dev/null 2>&1 || $SUDO service mariadb start >/dev/null 2>&1
+redis-cli ping >/dev/null 2>&1 || $SUDO service redis-server start >/dev/null 2>&1
 
 echo "==> Ensuring database + user"
-mariadb -e "CREATE DATABASE IF NOT EXISTS school_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+$SUDO mariadb -e "CREATE DATABASE IF NOT EXISTS school_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS 'school'@'127.0.0.1' IDENTIFIED BY 'school_secret';
 GRANT ALL PRIVILEGES ON school_platform.* TO 'school'@'127.0.0.1'; FLUSH PRIVILEGES;" 2>/dev/null
 
