@@ -1,0 +1,50 @@
+name: Publish Teacher Platform to GitHub Pages
+
+on:
+  push:
+    branches:
+      - teacher-platform
+    paths:
+      - "teacher-platform/**"
+      - ".github/workflows/teacher-platform-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: teacher-platform-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout isolated branch
+        uses: actions/checkout@v4
+
+      - name: Prepare isolated site path
+        run: |
+          test -f teacher-platform/index.html
+          mkdir -p site/teacher-platform
+          cp teacher-platform/index.html site/teacher-platform/index.html
+          cp teacher-platform/README.md site/teacher-platform/README.md
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy site
+        id: deployment
+        uses: actions/deploy-pages@v4
