@@ -43,6 +43,7 @@ let timeIntro=Math.max(3,Math.round(tm*.1)),timeExplain=Math.max(5,Math.round(tm
 lesson={id:Date.now(),sub:$('sub').value,g:$('grade').value,t:title,tm:tm,notes:$('notes').value,source:source,paragraphs:paras,date:new Date().toLocaleDateString('ar-YE')};
 let pointText=mainPoints.map((p,i)=>{let short=p.length>220?p.slice(0,217)+'…':p;return (i+1)+'. النقطة الأساسية: '+short+'\n   شرح مبسط: '+simpleExplanation(short)}).join('\n\n');
 let questions=mainPoints.slice(0,5).map((p,i)=>'- '+questionFromPoint(p,i));
+lesson.mainPoints=mainPoints;lesson.keywords=keywords;lesson.questions=questions;lesson.images=[];
 lesson.text='تحضير مستخرج من الكتاب المدرسي\nعنوان الدرس: '+title+'\nالمادة: '+lesson.sub+'\nالصف: '+lesson.g+'\nالزمن: '+tm+' دقيقة\n\nأولاً: أهم النقاط مع شرح مبسط\n'+pointText+'\n\nثانياً: المصطلحات التي ظهرت في النص\n'+(keywords.length?keywords.join('، '):'راجع المصطلحات الظاهرة في الصفحة')+'\n\nثالثاً: أسئلة مراجعة من محتوى الكتاب\n'+questions.join('\n')+'\n\nرابعاً: خطة الدرس\n- تمهيد وربط بالمعرفة السابقة: '+timeIntro+' دقائق.\n- شرح النقاط المستخرجة ومناقشتها: '+timeExplain+' دقيقة.\n- نشاط: يختار الطالب نقطة ويشرحها بكلماته: '+timeActivity+' دقائق.\n- تقويم سريع باستخدام أسئلة المراجعة: '+timeAssess+' دقائق.\n\nملاحظات المعلم: '+(lesson.notes||'لا توجد ملاحظات إضافية.')+'\n\nتنبيه: راجع دقة النص المستخرج، والشرح المبسط، والأسئلة قبل اعتماد التحضير.';
 $('lessonText').textContent=lesson.text;$('lessonOut').classList.remove('hidden');
 await searchLessonImages(title,keywords);
