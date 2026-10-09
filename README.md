@@ -369,6 +369,30 @@ php artisan test
 
 ---
 
+## تشغيل عرض حيّ (Demo)
+
+سكربت واحد يجهّز كل شيء (قاعدة البيانات + الباك اند + واجهة Flutter الويب):
+
+```bash
+# بذر بيانات جديدة من الصفر (اختياري)
+FRESH=1 bash scripts/run_demo.sh
+# أو بدون إعادة البذر
+bash scripts/run_demo.sh
+```
+
+- **واجهة الويب:** منفذ `12001`
+- **واجهة الـ API:** منفذ `12000` (البادئة `/api/v1`)
+
+### حسابات العرض (كلمة المرور للجميع: `password`)
+
+| الدور | البريد |
+|------|--------|
+| مالك المنصة | `owner@school-platform.local` |
+| مدير مدرسة | `manager@school-platform.local` |
+| معلم | `teacher1@school-platform.local` |
+| ولي أمر | `parent@school-platform.local` |
+| طالب | `student@school-platform.local` |
+
 ## الخطوات التالية
 
 - ربط تطبيق Flutter بواجهات البوابات والإشعارات والوحدة المالية وقوالب الاستيراد، وإضافة لوحة الوزارة للترتيب الوطني.
