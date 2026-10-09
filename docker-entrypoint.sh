@@ -1,22 +1,44 @@
 #!/bin/sh
-set -e
+set -eu
 
 cd /var/www/html
 
-# Render supplies the real MySQL credentials as environment variables.
-# Never store production credentials in GitHub.
-if [ "${DB_CONNECTION:-}" = "mysql" ]; then
-  echo "Waiting for MySQL..."
+# Production database credentials belong in Render Environment, never in Git.
+if [ "${DB_CONNECTION:-mysql}" = "mysql" ]; then
+  if [ -z "${DB_HOST:-}" ] || [ -z "${DB_DATABASE:-}" ] || [ -z "${DB_USERNAME:-}" ] || [ -z "${DB_PASSWORD:-}" ]; then
+    echo "Database configuration incomplete: set DB_HOST, DB_DATABASE, DB_USERNAME and DB_PASSWORD in Render Environment." >&2
+    exit 1
+  fi
+
+  echo "Checking MySQL connectivity (host and credentials are not logged)..."
   php -r '
-    $host=getenv("DB_HOST"); $port=getenv("DB_PORT") ?: "3306";
-    $db=getenv("DB_DATABASE"); $user=getenv("DB_USERNAME"); $pass=getenv("DB_PASSWORD");
-    for ($i=1; $i<=30; $i++) {
-      try {
-        new PDO("mysql:host=$host;port=$port;dbname=$db", $user, $pass, [PDO::ATTR_TIMEOUT=>3]);
-        exit(0);
-      } catch (Throwable $e) { fwrite(STDERR, "MySQL not ready ($i/30)\n"); sleep(2); }
+    $host = getenv("DB_HOST");
+    $port = getenv("DB_PORT") ?: "3306";
+    $db = getenv("DB_DATABASE");
+    $user = getenv("DB_USERNAME");
+    $pass = getenv("DB_PASSWORD");
+    $options = [PDO::ATTR_TIMEOUT => 5];
+    $ca = getenv("MYSQL_ATTR_SSL_CA");
+    if ($ca !== false && $ca !== "" && is_readable($ca)) {
+      $options[PDO::MYSQL_ATTR_SSL_CA] = $ca;
     }
-    fwrite(STDERR, "MySQL connection failed after 60 seconds.\n"); exit(1);
+    $lastError = "unknown connection error";
+    for ($i = 1; $i <= 30; $i++) {
+      try {
+        $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass, $options);
+        $pdo->query("SELECT 1");
+        echo "MySQL connectivity verified.\n";
+        exit(0);
+      } catch (Throwable $e) {
+        $lastError = $e->getMessage();
+        if ($i === 1 || $i % 10 === 0) {
+          fwrite(STDERR, "MySQL connection attempt $i/30 failed: " . $lastError . "\n");
+        }
+        sleep(2);
+      }
+    }
+    fwrite(STDERR, "MySQL connection failed after 60 seconds. Last error: " . $lastError . "\n");
+    exit(1);
   '
 fi
 
