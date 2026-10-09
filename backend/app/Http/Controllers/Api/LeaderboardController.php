@@ -49,6 +49,65 @@ class LeaderboardController extends Controller
     }
 
     /**
+     * List ranking periods, most recent first (optionally only active ones).
+     */
+    public function periods(Request $request): JsonResponse
+    {
+        $periods = RankingPeriod::query()
+            ->when($request->boolean('active_only'), fn ($q) => $q->where('is_active', true))
+            ->orderByDesc('starts_on')
+            ->get();
+
+        return response()->json([
+            'data' => $periods->map(fn (RankingPeriod $p) => [
+                'id' => $p->getKey(),
+                'name' => $p->name,
+                'type' => $p->type,
+                'starts_on' => $p->starts_on?->toDateString(),
+                'ends_on' => $p->ends_on?->toDateString(),
+                'is_active' => $p->is_active,
+                'is_locked' => $p->is_locked,
+            ]),
+        ]);
+    }
+
+    /**
+     * Create a ranking period (staff only).
+     */
+    public function storePeriod(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'type' => ['nullable', Rule::in([
+                RankingPeriod::TYPE_TERM,
+                RankingPeriod::TYPE_SEMESTER,
+                RankingPeriod::TYPE_MONTH,
+                RankingPeriod::TYPE_YEAR,
+                RankingPeriod::TYPE_CUSTOM,
+            ])],
+            'starts_on' => ['required', 'date'],
+            'ends_on' => ['required', 'date', 'after_or_equal:starts_on'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+
+        $period = RankingPeriod::create($validated + [
+            'type' => $validated['type'] ?? RankingPeriod::TYPE_TERM,
+            'is_active' => $validated['is_active'] ?? true,
+        ]);
+
+        return response()->json([
+            'data' => [
+                'id' => $period->getKey(),
+                'name' => $period->name,
+                'type' => $period->type,
+                'starts_on' => $period->starts_on?->toDateString(),
+                'ends_on' => $period->ends_on?->toDateString(),
+                'is_active' => $period->is_active,
+            ],
+        ], 201);
+    }
+
+    /**
      * The current school's own position in each scope for a period.
      */
     public function myPosition(Request $request, RankingPeriod $period): JsonResponse

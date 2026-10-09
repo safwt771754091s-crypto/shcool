@@ -66,6 +66,10 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware('permission:organizations.update');
 
             // Competition / leaderboards
+            Route::get('ranking-periods', [LeaderboardController::class, 'periods'])
+                ->middleware('permission:reports.view');
+            Route::post('ranking-periods', [LeaderboardController::class, 'storePeriod'])
+                ->middleware('permission:reports.export');
             Route::get('ranking-periods/{period}/leaderboard', [LeaderboardController::class, 'index'])
                 ->middleware('permission:reports.view');
             Route::get('ranking-periods/{period}/my-position', [LeaderboardController::class, 'myPosition'])

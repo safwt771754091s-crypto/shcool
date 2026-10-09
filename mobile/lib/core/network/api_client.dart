@@ -56,6 +56,22 @@ class ApiClient {
   Future<dynamic> put(String path, {Object? data}) =>
       _request(() => _dio.put(path, data: data));
 
+  /// Multipart upload (used by bulk Excel/CSV import).
+  Future<dynamic> upload(
+    String path, {
+    required String field,
+    required List<int> bytes,
+    required String filename,
+    Map<String, dynamic> fields = const {},
+  }) =>
+      _request(() => _dio.post(
+            path,
+            data: FormData.fromMap({
+              ...fields,
+              field: MultipartFile.fromBytes(bytes, filename: filename),
+            }),
+          ));
+
   /// POST with an explicit bearer token, bypassing the stored one. Used for the
   /// restricted 2FA challenge token.
   Future<dynamic> postWithToken(String path, String token, {Object? data}) =>

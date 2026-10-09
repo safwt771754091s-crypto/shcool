@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 import '../core/config/app_config.dart';
 import '../state/auth_provider.dart';
 import 'admin_hierarchy_screen.dart';
+import 'import_screen.dart';
 import 'mini_apps_screen.dart';
 import 'monitoring_screen.dart';
+import 'national_ranking_screen.dart';
+import 'notifications_screen.dart';
 
 /// Owner/ministry landing dashboard: quick access to the administrative
 /// hierarchy and the mini-app registry, plus the signed-in identity.
@@ -100,6 +103,35 @@ class OwnerDashboardScreen extends StatelessWidget {
             subtitle: 'نظرة قراءة فقط على كل المحافظات والمدارس والكشوف',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const MonitoringScreen()),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const _SectionTitle('المنافسة والترتيب'),
+          _DashboardTile(
+            icon: Icons.emoji_events_outlined,
+            title: 'الترتيب الوطني',
+            subtitle: 'ترتيب المدارس والمديريات والمحافظات والطلاب',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const NationalRankingScreen()),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const _SectionTitle('البيانات والإشعارات'),
+          _DashboardTile(
+            icon: Icons.upload_file_outlined,
+            title: 'ترحيل البيانات (Excel/CSV)',
+            subtitle: 'استيراد الطلاب والمعلمين عبر قوالب جاهزة',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ImportScreen()),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _DashboardTile(
+            icon: Icons.notifications_outlined,
+            title: 'الإشعارات',
+            subtitle: 'صندوق الوارد وتفضيلات قنوات الإرسال',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
             ),
           ),
         ],

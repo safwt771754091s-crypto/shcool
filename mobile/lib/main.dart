@@ -8,9 +8,17 @@ import 'core/storage/offline_store.dart';
 import 'core/storage/token_store.dart';
 import 'core/theme/app_theme.dart';
 import 'router/app_router.dart';
+import 'services/academic_service.dart';
 import 'services/admin_service.dart';
 import 'services/auth_service.dart';
+import 'services/competition_service.dart';
+import 'services/finance_service.dart';
+import 'services/import_service.dart';
+import 'services/notification_service.dart';
 import 'services/portal_service.dart';
+import 'services/records_service.dart';
+import 'services/staff_service.dart';
+import 'services/student_service.dart';
 import 'services/sync_service.dart';
 import 'services/teacher_service.dart';
 import 'state/auth_provider.dart';
@@ -34,6 +42,14 @@ class SchoolApp extends StatelessWidget {
         Provider<PortalService>(create: (_) => PortalService(api)),
         Provider<TeacherService>(create: (_) => TeacherService(api)),
         Provider<AdminService>(create: (_) => AdminService(api)),
+        Provider<AcademicService>(create: (_) => AcademicService(api)),
+        Provider<StudentService>(create: (_) => StudentService(api)),
+        Provider<StaffService>(create: (_) => StaffService(api)),
+        Provider<RecordsService>(create: (_) => RecordsService(api)),
+        Provider<FinanceService>(create: (_) => FinanceService(api)),
+        Provider<CompetitionService>(create: (_) => CompetitionService(api)),
+        Provider<NotificationService>(create: (_) => NotificationService(api)),
+        Provider<ImportService>(create: (_) => ImportService(api)),
         Provider<SyncService>(create: (_) => SyncService(api, OfflineStore())),
         ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(AuthService(api, tokens))..bootstrap(),

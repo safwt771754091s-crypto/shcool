@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../state/auth_provider.dart';
 import 'monitoring_screen.dart';
+import 'national_ranking_screen.dart';
+import 'notifications_screen.dart';
 
 /// Landing dashboard for the Minister of Education (وزير التربية): a single,
 /// read-only monitoring hub over the whole platform.
@@ -66,6 +68,32 @@ class MinisterDashboardScreen extends StatelessWidget {
               trailing: const Icon(Icons.chevron_left),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const MonitoringScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: ListTile(
+              leading: const Icon(Icons.emoji_events_outlined),
+              title: const Text('الترتيب الوطني'),
+              subtitle: const Text('ترتيب المدارس والمحافظات والطلاب'),
+              trailing: const Icon(Icons.chevron_left),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const NationalRankingScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: ListTile(
+              leading: const Icon(Icons.notifications_outlined),
+              title: const Text('الإشعارات'),
+              subtitle: const Text('صندوق الوارد وتفضيلات القنوات'),
+              trailing: const Icon(Icons.chevron_left),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const NotificationsScreen()),
               ),
             ),
           ),
