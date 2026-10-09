@@ -150,6 +150,10 @@ class RoleProvisioner
 
     protected function guard(): string
     {
-        return config('auth.defaults.guard', 'web');
+        // Sanctum switches `auth.defaults.guard` to `sanctum` for the duration
+        // of an API request. Roles and permissions all live under `web` (the
+        // guard the seeded catalogue uses), so pin it rather than reading the
+        // mutable runtime config.
+        return 'web';
     }
 }

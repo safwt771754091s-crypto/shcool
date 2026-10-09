@@ -11,6 +11,12 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
  */
 class Permission extends SpatiePermission
 {
+    /**
+     * Permissions live under a single guard. Pin it so runtime guard switching
+     * (Sanctum sets the default guard to `sanctum`) never splits the catalogue.
+     */
+    protected $guard_name = 'web';
+
     protected $fillable = [
         'name',
         'guard_name',

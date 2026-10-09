@@ -8,6 +8,7 @@ import 'core/storage/offline_store.dart';
 import 'core/storage/token_store.dart';
 import 'core/theme/app_theme.dart';
 import 'router/app_router.dart';
+import 'services/admin_service.dart';
 import 'services/auth_service.dart';
 import 'services/portal_service.dart';
 import 'services/sync_service.dart';
@@ -32,6 +33,7 @@ class SchoolApp extends StatelessWidget {
         Provider<ApiClient>.value(value: api),
         Provider<PortalService>(create: (_) => PortalService(api)),
         Provider<TeacherService>(create: (_) => TeacherService(api)),
+        Provider<AdminService>(create: (_) => AdminService(api)),
         Provider<SyncService>(create: (_) => SyncService(api, OfflineStore())),
         ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(AuthService(api, tokens))..bootstrap(),

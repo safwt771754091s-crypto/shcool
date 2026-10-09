@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/persona.dart';
 import '../state/auth_provider.dart';
+import 'owner_dashboard_screen.dart';
 import 'parent_portal_screen.dart';
 import 'staff_overview_screen.dart';
 import 'student_portal_screen.dart';
@@ -17,6 +18,7 @@ class HomeScreen extends StatelessWidget {
     final persona = personaFor(user);
 
     return switch (persona) {
+      Persona.owner => const OwnerDashboardScreen(),
       Persona.teacher => const TeacherHomeScreen(),
       Persona.parent => const ParentPortalScreen(),
       Persona.student => const StudentPortalScreen(),

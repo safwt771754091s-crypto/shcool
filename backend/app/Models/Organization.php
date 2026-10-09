@@ -64,6 +64,33 @@ class Organization extends Model
         ];
     }
 
+    /**
+     * `slug` is NOT NULL and unique, but callers only supply a name and code.
+     * Derive a stable, unique slug so inserts never fail on the constraint.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $organization): void {
+            if (blank($organization->slug)) {
+                $organization->slug = static::uniqueSlug(
+                    $organization->code ?: $organization->name,
+                );
+            }
+        });
+    }
+
+    protected static function uniqueSlug(string $source): string
+    {
+        $base = \Illuminate\Support\Str::slug($source) ?: 'org';
+        $slug = $base;
+
+        for ($i = 2; static::withTrashed()->where('slug', $slug)->exists(); $i++) {
+            $slug = $base.'-'.$i;
+        }
+
+        return $slug;
+    }
+
     // ---------------------------------------------------------------------
     // Relationships
     // ---------------------------------------------------------------------

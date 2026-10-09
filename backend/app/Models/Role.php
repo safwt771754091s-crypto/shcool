@@ -13,6 +13,13 @@ use Spatie\Permission\Models\Role as SpatieRole;
  */
 class Role extends SpatieRole
 {
+    /**
+     * Pin the guard. `config('auth.defaults.guard')` is mutated to `sanctum`
+     * at runtime during API requests, which would otherwise make newly
+     * provisioned roles use a guard that has no permission records.
+     */
+    protected $guard_name = 'web';
+
     protected $fillable = [
         'name',
         'guard_name',
