@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\LeaderboardEntryResource;
 use App\Models\LeaderboardEntry;
 use App\Models\RankingPeriod;
+use App\Models\Student\Student;
 use App\Services\Competition\CompetitionService;
 use App\Support\Tenancy\TenantManager;
 use Illuminate\Http\JsonResponse;
@@ -23,8 +24,7 @@ class LeaderboardController extends Controller
     public function __construct(
         protected CompetitionService $competition,
         protected TenantManager $tenants,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request, RankingPeriod $period): JsonResponse
     {
@@ -74,5 +74,58 @@ class LeaderboardController extends Controller
         $this->competition->recompute($period);
 
         return response()->json(['message' => 'تم إعادة احتساب الترتيب.']);
+    }
+
+    /**
+     * Recompute the boards from real academic data (grades, attendance,
+     * activities) then roll them up the hierarchy.
+     */
+    public function recomputeFromAcademics(RankingPeriod $period): JsonResponse
+    {
+        $this->competition->recomputeFromAcademics($period);
+
+        return response()->json(['message' => 'تم إعادة احتساب الترتيب من البيانات الأكاديمية.']);
+    }
+
+    /**
+     * The signed-in student's own position in each scope of the period.
+     */
+    public function myStudentPosition(Request $request, RankingPeriod $period): JsonResponse
+    {
+        $studentId = $request->integer('student_id') ?: Student::query()
+            ->where('user_id', $request->user()->getKey())
+            ->value('id');
+
+        if ($studentId === null) {
+            return response()->json(['data' => null]);
+        }
+
+        $entry = LeaderboardEntry::query()
+            ->where('ranking_period_id', $period->getKey())
+            ->where('scope_type', LeaderboardEntry::SCOPE_STUDENT)
+            ->where('scope_id', $studentId)
+            ->first();
+
+        return response()->json([
+            'data' => $entry ? new LeaderboardEntryResource($entry) : null,
+        ]);
+    }
+
+    /**
+     * The classes of the current school ranked for the period.
+     */
+    public function classLeaderboard(Request $request, RankingPeriod $period): JsonResponse
+    {
+        $entries = LeaderboardEntry::query()
+            ->where('ranking_period_id', $period->getKey())
+            ->where('scope_type', LeaderboardEntry::SCOPE_CLASS)
+            ->orderBy('rank')
+            ->when($request->integer('limit'), fn ($q, $limit) => $q->limit($limit))
+            ->get();
+
+        return response()->json([
+            'data' => LeaderboardEntryResource::collection($entries),
+            'meta' => ['scope' => LeaderboardEntry::SCOPE_CLASS],
+        ]);
     }
 }

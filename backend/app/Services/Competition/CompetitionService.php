@@ -19,8 +19,7 @@ class CompetitionService
         protected LeaderboardService $leaderboards,
         protected ScoreCalculator $calculator,
         protected AuditLogger $audit,
-    ) {
-    }
+    ) {}
 
     /**
      * The ranked table for a scope in a period.
@@ -60,5 +59,14 @@ class CompetitionService
     public function recompute(RankingPeriod $period): void
     {
         $this->leaderboards->recomputeAll($period);
+    }
+
+    /**
+     * Full recompute: measure students from real academic data, then roll the
+     * results up the administrative hierarchy.
+     */
+    public function recomputeFromAcademics(RankingPeriod $period): void
+    {
+        $this->leaderboards->recomputeFromAcademics($period);
     }
 }

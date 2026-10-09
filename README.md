@@ -259,6 +259,65 @@ php artisan test
 
 ---
 
+## المرحلة الرابعة (الإشعارات والتقارير والتصدير والبوابات الخارجية)
+
+### الإشعارات (SMS / WhatsApp / داخل التطبيق)
+
+- قنوات قابلة للتوسعة عبر عقد `NotificationChannel`: `sms`، `whatsapp`، `in_app`.
+- `NotificationChannelManager` يكتشف القناة **متاحة** فقط عند تهيئة إعداداتها؛
+  غياب المفاتيح لا يُعطّل المنصة بل يُخفي الخيار (نفس نمط بقية الوحدات).
+- `NotificationTemplate` — قوالب قابلة للتخصيص لكل مدرسة (المتغيّرات `:name`).
+- `NotificationPreference` — تفضيلات المستخدم لكل قناة (تمكين/تعطيل).
+- `NotificationLog` — سجل تسليم لكل رسالة (الحالة، عدد المحاولات، معرّف المزوّد).
+- `NotificationService` — `sendToUser` / `sendToRecipients` / `render` / `deliver`.
+- `AlertDispatcher` — تنبيهات الغياب لأولياء الأمور بالهاتف عبر قناة SMS.
+- `SendNotificationJob` — إرسال عبر الطوابير (Queues) دون حجب الطلب.
+- أمر مجدول: `php artisan notifications:absence-alerts` (يومياً 07:30).
+
+### التقارير والتصدير
+
+- `ReportService` — تقارير: الطلاب، المعلمين، الحضور، تنبيهات الغياب، النتائج
+  (النتائج مرتّبة بالرتبة، والحضور مُلخّص لكل شعبة).
+- `ExcelExporter` (OpenSpout) — تصدير `.xlsx` بعناوين بارزة.
+- `PdfExporter` (DomPDF) — تصدير `.pdf` بترويسة عربية.
+- `GET /api/v1/reports/export/{format}` حيث `format` ∈ `xlsx|csv|pdf`.
+- `GET /api/v1/reports/schools-overview` — نظرة الوزارة/المديرية على المدارس.
+
+### البوابات الخارجية
+
+- بوابة ولي الأمر: `GET /api/v1/portal/parent` — الأبناء، حضورهم، نتائجهم، رسومهم.
+- بوابة الطالب: `GET /api/v1/portal/student` — الجدول، الدرجات، الرتبة، الإشعارات.
+
+### نظام التنافس والترتيب من البيانات الأكاديمية
+
+- `StudentRankingService` يقيس كل طالب على كل معيار (المعدل، الحضور، الغياب،
+  المشاركة)، ثم **يُطبّع** القيم داخل الدفعة (الأفضل = 100 والضعف = 0)،
+  ويكتب صف `competition_scores` لكل طالب/معيار.
+- يُجمّع الطلاب إلى صفوف على مستوى الشعبة (`scope=class`) مع تفصيل لكل معيار.
+- `LeaderboardService::recomputeFromAcademics` يدير السلسلة كاملة:
+  طالب ← شعبة ← مدرسة ← مديرية ← محافظة ← وزارة.
+
+### واجهات المرحلة الرابعة
+
+| الطريقة | المسار | الوصف |
+|---------|--------|-------|
+| `GET` | `/api/v1/notifications/inbox` | صندوق الإشعارات |
+| `GET` | `/api/v1/notifications/channels` | القنوات المتاحة |
+| `GET/PUT` | `/api/v1/notifications/preferences` | تفضيلات القنوات |
+| `GET/POST` | `/api/v1/notifications/templates` | القوالب |
+| `POST` | `/api/v1/notifications/send` | إرسال إشعار |
+| `GET` | `/api/v1/notifications/logs` | سجل التسليم |
+| `GET` | `/api/v1/reports` | التقارير المتاحة |
+| `GET` | `/api/v1/reports/export/{format}` | تصدير `xlsx\|csv\|pdf` |
+| `GET` | `/api/v1/reports/schools-overview` | نظرة عامة على المدارس |
+| `GET` | `/api/v1/portal/parent` | بوابة ولي الأمر |
+| `GET` | `/api/v1/portal/student` | بوابة الطالب |
+| `GET` | `/api/v1/ranking-periods/{period}/classes` | ترتيب الشعب |
+| `GET` | `/api/v1/ranking-periods/{period}/my-student-position` | رتبة الطالب الحالي |
+| `POST` | `/api/v1/ranking-periods/{period}/recompute-academics` | إعادة احتساب الترتيب من البيانات الأكاديمية |
+
+---
+
 ## الخطوات التالية
 
-- **المرحلة الرابعة:** الإشعارات (SMS/WhatsApp)، التقارير والتصدير، البوابات الخارجية.
+- ربط تطبيق Flutter بواجهات البوابات والإشعارات، وإضافة لوحة الوزارة للترتيب الوطني.

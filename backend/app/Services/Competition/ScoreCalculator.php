@@ -4,6 +4,7 @@ namespace App\Services\Competition;
 
 use App\Models\CompetitionMetric;
 use App\Models\CompetitionScore;
+use App\Support\Tenancy\Scopes\TenantScope;
 
 /**
  * Converts a raw measured value into weighted points.
@@ -42,7 +43,7 @@ class ScoreCalculator
         float $max = 100,
         array $meta = [],
     ): CompetitionScore {
-        return CompetitionScore::withoutGlobalScope(\App\Support\Tenancy\Scopes\TenantScope::class)
+        return CompetitionScore::withoutGlobalScope(TenantScope::class)
             ->updateOrCreate(
                 [
                     'ranking_period_id' => $periodId,

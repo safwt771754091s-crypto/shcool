@@ -20,9 +20,7 @@ use Illuminate\Support\Facades\DB;
  */
 class LeaderboardService
 {
-    public function __construct(protected TenantManager $tenants)
-    {
-    }
+    public function __construct(protected TenantManager $tenants) {}
 
     /**
      * Recompute every scope for a period, from the smallest scope upward.
@@ -42,7 +40,7 @@ class LeaderboardService
      * Aggregate a child scope into its parent scope and rank the result.
      *
      * @param  string  $parentScope  LeaderboardEntry scope constant to write.
-     * @param  string  $childScope   LeaderboardEntry scope constant to read.
+     * @param  string  $childScope  LeaderboardEntry scope constant to read.
      * @param  callable(LeaderboardEntry): (int|null)  $parentOf
      */
     public function rollUp(
@@ -120,8 +118,75 @@ class LeaderboardService
 
     protected function recomputeClasses(RankingPeriod $period): void
     {
-        // Populated by the academic module once classes exist. Kept explicit so
+        // Class rows are produced by StudentRankingService from real academic
+        // data; recomputeFromAcademics() drives that. Kept explicit so
         // recomputeAll() documents the full pipeline.
+    }
+
+    /**
+     * Persist ranked rows for a tenant-scoped board (student, class).
+     *
+     * Unlike persist(), these rows always carry the owning school's tenant_id
+     * so the school's own dashboards can read them under the tenant scope.
+     *
+     * @param  Collection<int, array{scope_id: int, name: string, total_points: float, sample_size: int, breakdown?: array<string, float>}>  $rows
+     */
+    public function persistForTenant(RankingPeriod $period, string $scope, Collection $rows, Organization $school): void
+    {
+        $ranked = $rows->sortByDesc('total_points')->values();
+
+        DB::transaction(function () use ($period, $scope, $ranked, $school): void {
+            $previous = LeaderboardEntry::query()
+                ->where('ranking_period_id', $period->getKey())
+                ->where('scope_type', $scope)
+                ->where('tenant_id', $school->getKey())
+                ->pluck('rank', 'scope_id');
+
+            foreach ($ranked as $index => $row) {
+                $rank = $index + 1;
+                $previousRank = $previous[$row['scope_id']] ?? null;
+
+                LeaderboardEntry::query()->updateOrCreate(
+                    [
+                        'ranking_period_id' => $period->getKey(),
+                        'scope_type' => $scope,
+                        'scope_id' => $row['scope_id'],
+                    ],
+                    [
+                        'tenant_id' => $school->getKey(),
+                        'name' => $row['name'],
+                        'total_points' => $row['total_points'],
+                        'sample_size' => $row['sample_size'],
+                        'breakdown' => $row['breakdown'] ?? null,
+                        'rank' => $rank,
+                        'previous_rank' => $previousRank,
+                        'rank_delta' => $previousRank ? ($previousRank - $rank) : 0,
+                        'computed_at' => now(),
+                    ],
+                );
+            }
+        });
+    }
+
+    /**
+     * Recompute every school's student/class boards from real academic data,
+     * then roll the results up the hierarchy. This is the end-to-end entry
+     * point used by the recompute endpoint and the scheduler.
+     */
+    public function recomputeFromAcademics(RankingPeriod $period): void
+    {
+        $this->tenants->withoutTenancy(function () use ($period): void {
+            $ranking = app(StudentRankingService::class);
+
+            Organization::query()
+                ->where('type', Organization::TYPE_SCHOOL)
+                ->each(fn (Organization $school) => $ranking->recomputeSchool($period, $school));
+
+            $this->recomputeSchools($period);
+            $this->recomputeDirectorates($period);
+            $this->recomputeGovernorates($period);
+            $this->recomputeMinistry($period);
+        });
     }
 
     protected function recomputeSchools(RankingPeriod $period): void

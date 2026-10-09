@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Organization;
+
 return [
 
     /*
@@ -10,7 +12,7 @@ return [
     | school-level organization; branches share their school's tenant_id.
     */
 
-    'tenant_model' => App\Models\Organization::class,
+    'tenant_model' => Organization::class,
 
     /*
     |--------------------------------------------------------------------------

@@ -35,4 +35,33 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | SMS gateway
+    |--------------------------------------------------------------------------
+    | A generic HTTP SMS provider (Twilio-compatible). Leave the credentials
+    | empty to disable the channel; the platform then records messages as
+    | queued instead of sending them.
+    */
+    'sms' => [
+        'endpoint' => env('SMS_ENDPOINT'),
+        'username' => env('SMS_USERNAME'),
+        'password' => env('SMS_PASSWORD'),
+        'sender' => env('SMS_SENDER'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | WhatsApp Business Cloud API
+    |--------------------------------------------------------------------------
+    | Meta Graph API credentials. Without a token and phone number id the
+    | WhatsApp channel stays unavailable and is skipped automatically.
+    */
+    'whatsapp' => [
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'api_version' => env('WHATSAPP_API_VERSION', 'v20.0'),
+        'base_url' => env('WHATSAPP_BASE_URL', 'https://graph.facebook.com'),
+    ],
+
 ];

@@ -8,7 +8,10 @@ use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\GuardianController;
 use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\MiniAppController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OrganizationController;
+use App\Http\Controllers\Api\PortalController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SportsLeagueController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\SyncController;
@@ -62,7 +65,12 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware('permission:reports.view');
             Route::get('ranking-periods/{period}/my-position', [LeaderboardController::class, 'myPosition'])
                 ->middleware('permission:reports.view');
+            Route::get('ranking-periods/{period}/classes', [LeaderboardController::class, 'classLeaderboard'])
+                ->middleware('permission:reports.view');
+            Route::get('ranking-periods/{period}/my-student-position', [LeaderboardController::class, 'myStudentPosition']);
             Route::post('ranking-periods/{period}/recompute', [LeaderboardController::class, 'recompute'])
+                ->middleware('permission:reports.export');
+            Route::post('ranking-periods/{period}/recompute-academics', [LeaderboardController::class, 'recomputeFromAcademics'])
                 ->middleware('permission:reports.export');
 
             // ---- Academic structure -----------------------------------
@@ -224,6 +232,36 @@ Route::prefix('v1')->group(function (): void {
             // ---- Offline sync -----------------------------------------
             Route::post('sync/push', [SyncController::class, 'push'])
                 ->middleware('permission:attendance.create');
+
+            // ---- Reports & exports ------------------------------------
+            Route::get('reports', [ReportController::class, 'index'])
+                ->middleware('permission:reports.view');
+            Route::get('reports/schools-overview', [ReportController::class, 'schoolsOverview'])
+                ->middleware('permission:reports.view');
+            Route::get('reports/export/{format}', [ReportController::class, 'export'])
+                ->whereIn('format', ['pdf', 'xlsx', 'csv'])
+                ->middleware('permission:reports.export');
+
+            // ---- Notifications ----------------------------------------
+            Route::get('notifications/channels', [NotificationController::class, 'channels'])
+                ->middleware('permission:notifications.view');
+            Route::get('notifications/templates', [NotificationController::class, 'templates'])
+                ->middleware('permission:notifications.view');
+            Route::post('notifications/templates', [NotificationController::class, 'storeTemplate'])
+                ->middleware('permission:notifications.manage-templates');
+            Route::post('notifications/send', [NotificationController::class, 'send'])
+                ->middleware('permission:notifications.send');
+            Route::get('notifications/logs', [NotificationController::class, 'logs'])
+                ->middleware('permission:notifications.view');
+            Route::get('notifications/inbox', [NotificationController::class, 'inbox']);
+            Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead']);
+            Route::get('notifications/preferences', [NotificationController::class, 'preferences']);
+            Route::put('notifications/preferences', [NotificationController::class, 'updatePreferences']);
+
+            // ---- Parent & student portals -----------------------------
+            Route::get('portal/parent', [PortalController::class, 'parent'])
+                ->middleware('permission:parents.view');
+            Route::get('portal/student', [PortalController::class, 'student']);
         });
     });
 });
