@@ -10,10 +10,12 @@ use App\Models\User;
 use App\Services\AuthService;
 use App\Services\TwoFactorService;
 use App\Support\Audit\AuditLogger;
+use App\Support\Permission\GlobalTeam;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\PermissionRegistrar;
 
 class AuthController extends Controller
 {
@@ -33,6 +35,11 @@ class AuthController extends Controller
         );
 
         $device = $request->string('device_name')->toString() ?: 'web';
+
+        // Roles/permissions are team-scoped; establish the user's context before
+        // issuing the token (abilities are derived from permissions) or building
+        // the payload.
+        $this->applyRoleContext($user);
 
         // If 2FA is enabled, issue a restricted token and ask for the code.
         if ($user->hasTwoFactorEnabled()) {
@@ -76,6 +83,8 @@ class AuthController extends Controller
         // Rotate: drop the challenge token, issue a full token.
         $request->user()->currentAccessToken()->delete();
 
+        $this->applyRoleContext($user);
+
         $token = $this->auth->issueToken($user, 'web');
 
         $this->audit->log('auth.2fa_passed', $user, description: 'Two-factor challenge passed.');
@@ -86,7 +95,7 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         return response()->json([
-            'data' => new UserResource($request->user()->load('roles', 'tenant')),
+            'data' => $this->userResource($request->user(), $request),
         ]);
     }
 
@@ -106,8 +115,33 @@ class AuthController extends Controller
         return response()->json([
             'token' => $token,
             'token_type' => 'Bearer',
-            'user' => new UserResource($user->load('roles', 'tenant')),
+            'user' => $this->userResource($user, request()),
         ]);
+    }
+
+    /**
+     * Serialise a user with the role/permission context of their own school.
+     *
+     * spatie's "teams" feature scopes roles to the active team. On the login
+     * request no user is authenticated yet, so the team resolver falls back to
+     * the global team (id 0) and the school-scoped roles come back empty. Set
+     * the team explicitly to the user's tenant before loading roles.
+     */
+    protected function userResource(User $user, Request $request): UserResource
+    {
+        $this->applyRoleContext($user);
+
+        return new UserResource($user->load('roles', 'tenant'));
+    }
+
+    /**
+     * Point spatie's team resolver at the user's own school so role and
+     * permission lookups see that school's roles.
+     */
+    protected function applyRoleContext(User $user): void
+    {
+        app(PermissionRegistrar::class)
+            ->setPermissionsTeamId($user->tenant_id ?? GlobalTeam::ID);
     }
 
     protected function consumeRecoveryCode(User $user, string $code): bool

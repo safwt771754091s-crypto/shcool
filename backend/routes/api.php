@@ -296,8 +296,12 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware('permission:students.create');
 
             // ---- Parent & student portals -----------------------------
+            // A guardian reaches their own dashboard through their `parent`
+            // role; staff with the administrative `parents.view` permission may
+            // use it too. The endpoint itself only ever returns the caller's own
+            // children, so this is safe.
             Route::get('portal/parent', [PortalController::class, 'parent'])
-                ->middleware('permission:parents.view');
+                ->middleware('role_or_permission:parent|parents.view');
             Route::get('portal/student', [PortalController::class, 'student']);
         });
     });

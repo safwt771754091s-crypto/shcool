@@ -23,11 +23,12 @@ class ApiClient {
   ApiClient(this._tokens, {Dio? dio})
       : _dio = dio ??
             Dio(BaseOptions(
-              baseUrl: AppConfig.apiBaseUrl,
+              baseUrl: _normaliseBaseUrl(AppConfig.apiBaseUrl),
               connectTimeout: AppConfig.connectTimeout,
               receiveTimeout: AppConfig.receiveTimeout,
               headers: {'Accept': 'application/json'},
             )) {
+    _dio.options.baseUrl = _normaliseBaseUrl(_dio.options.baseUrl);
     _dio.interceptors.add(
       InterceptorsWrapper(onRequest: (options, handler) async {
         if (!options.headers.containsKey('Authorization')) {
@@ -97,4 +98,14 @@ class ApiClient {
 
   Map<String, dynamic>? _asMap(dynamic value) =>
       value is Map<String, dynamic> ? value : null;
+}
+
+/// Dio concatenates `baseUrl` + path with no separator, so a base URL like
+/// `https://host/api/v1` and a path like `auth/login` would become
+/// `.../api/v1auth/login`. Ensure the base ends with exactly one `/`.
+String _normaliseBaseUrl(String raw) {
+  var url = raw.trim();
+  if (url.isEmpty) return url;
+  if (!url.endsWith('/')) url = '$url/';
+  return url;
 }
