@@ -8,6 +8,7 @@ use App\Models\Exam\Exam;
 use App\Models\Student\Guardian;
 use App\Models\Student\Student;
 use App\Services\Exams\GradeService;
+use App\Services\Finance\FinanceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -21,7 +22,10 @@ use Illuminate\Support\Carbon;
  */
 class PortalController extends Controller
 {
-    public function __construct(protected GradeService $grades) {}
+    public function __construct(
+        protected GradeService $grades,
+        protected FinanceService $finance,
+    ) {}
 
     /**
      * Dashboard for the signed-in parent: their children plus, for each child,
@@ -107,6 +111,7 @@ class PortalController extends Controller
                     : 0.0,
             ],
             'result' => $this->grades->resultSheet($student),
+            'balance' => $this->finance->studentBalance($student),
         ];
 
         if ($includeUpcoming) {

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamController;
+use App\Http\Controllers\Api\FinanceController;
 use App\Http\Controllers\Api\GuardianController;
 use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\MiniAppController;
@@ -257,6 +258,30 @@ Route::prefix('v1')->group(function (): void {
             Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead']);
             Route::get('notifications/preferences', [NotificationController::class, 'preferences']);
             Route::put('notifications/preferences', [NotificationController::class, 'updatePreferences']);
+
+            // ---- Finance: fees, invoices, payments --------------------
+            Route::get('fees', [FinanceController::class, 'fees'])
+                ->middleware('permission:fees.view');
+            Route::post('fees', [FinanceController::class, 'storeFee'])
+                ->middleware('permission:fees.create');
+            Route::get('invoices', [FinanceController::class, 'invoices'])
+                ->middleware('permission:invoices.view');
+            Route::post('invoices', [FinanceController::class, 'storeInvoice'])
+                ->middleware('permission:invoices.create');
+            Route::post('invoices/issue-term', [FinanceController::class, 'issueTerm'])
+                ->middleware('permission:invoices.create');
+            Route::get('invoices/{invoice}', [FinanceController::class, 'showInvoice'])
+                ->middleware('permission:invoices.view');
+            Route::post('invoices/{invoice}/cancel', [FinanceController::class, 'cancelInvoice'])
+                ->middleware('permission:invoices.update');
+            Route::get('payments', [FinanceController::class, 'payments'])
+                ->middleware('permission:payments.view');
+            Route::post('payments', [FinanceController::class, 'storePayment'])
+                ->middleware('permission:fees.collect');
+            Route::get('finance/summary', [FinanceController::class, 'summary'])
+                ->middleware('permission:reports.view');
+            Route::get('students/{student}/balance', [FinanceController::class, 'studentBalance'])
+                ->middleware('permission:fees.view');
 
             // ---- Parent & student portals -----------------------------
             Route::get('portal/parent', [PortalController::class, 'parent'])

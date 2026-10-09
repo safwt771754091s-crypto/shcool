@@ -2,6 +2,7 @@
 
 namespace App\Services\Reports;
 
+use App\Models\Finance\Invoice;
 use App\Models\Organization;
 use App\Models\Staff\Teacher;
 use App\Models\Student\Student;
@@ -34,6 +35,7 @@ class ReportService
             'attendance' => $this->attendanceReport($filters),
             'absence-alerts' => $this->absenceAlertsReport($filters),
             'results' => $this->resultsReport($filters),
+            'invoices' => $this->invoicesReport($filters),
             default => throw new \InvalidArgumentException("Unknown report type [{$type}]."),
         };
     }
@@ -43,7 +45,7 @@ class ReportService
      */
     public static function types(): array
     {
-        return ['students', 'teachers', 'attendance', 'absence-alerts', 'results'];
+        return ['students', 'teachers', 'attendance', 'absence-alerts', 'results', 'invoices'];
     }
 
     /**
@@ -189,6 +191,40 @@ class ReportService
                 'full_name' => $r['full_name'],
                 'overall_average' => $r['overall_average'],
             ], $sheets),
+        ];
+    }
+
+    /**
+     * Outstanding and paid invoices for the school.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return array{title: string, headers: list<string>, rows: list<array<string, mixed>>}
+     */
+    protected function invoicesReport(array $filters): array
+    {
+        $query = Invoice::query()
+            ->with('student:id,full_name,student_number')
+            ->orderByDesc('id');
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        $rows = $query->get()->map(fn (Invoice $invoice) => [
+            'number' => $invoice->number,
+            'student_number' => $invoice->student?->student_number,
+            'full_name' => $invoice->student?->full_name,
+            'net_amount' => (float) $invoice->net_amount,
+            'paid_amount' => (float) $invoice->paid_amount,
+            'balance' => (float) $invoice->balance,
+            'status' => $invoice->status,
+            'issued_on' => $invoice->issued_on?->toDateString(),
+        ])->all();
+
+        return [
+            'title' => 'تقرير الفواتير',
+            'headers' => ['رقم الفاتورة', 'الرقم الأكاديمي', 'الاسم', 'الصافي', 'المدفوع', 'المتبقي', 'الحالة', 'تاريخ الإصدار'],
+            'rows' => $rows,
         ];
     }
 
