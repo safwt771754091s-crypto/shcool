@@ -18,29 +18,90 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="منصة المدرسة الرقمية">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="school_app">
+  <meta name="apple-mobile-web-app-title" content="منصة المدرسة الرقمية">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>school_app</title>
+  <title>منصة المدرسة الرقمية</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Shown until Flutter renders its first frame. Without it the page is
+       blank for several seconds on a cold load (CanvasKit is ~7MB). */
+    html, body { height: 100%; margin: 0; background: #f6fbf3; }
+    #boot {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 18px;
+      font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
+      color: #2f6a43; direction: rtl;
+    }
+    #boot .logo {
+      width: 84px; height: 84px; border-radius: 22px;
+      background: linear-gradient(135deg,#2f6a43,#3f8a57);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 44px;
+    }
+    #boot h1 { font-size: 20px; font-weight: 600; margin: 0; }
+    #boot .spinner {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 3px solid #cfe3d3; border-top-color: #2f6a43;
+      animation: spin 0.9s linear infinite;
+    }
+    #boot p { margin: 0; font-size: 13px; color: #6b7a6d; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
-
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <div id="boot">
+    <div class="logo">🎓</div>
+    <h1>منصة المدرسة الرقمية</h1>
+    <div class="spinner"></div>
+    <p>جارٍ تحميل التطبيق… قد يستغرق بضع ثوانٍ في أول مرة.</p>
+  </div>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // A stale service worker from an earlier build can keep serving the old,
+    // broken main.dart.js even after a fix is deployed. Drop it and its caches
+    // once, then the page loads fresh assets.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { r.unregister(); });
+      });
+    }
+    if (window.caches && caches.keys) {
+      caches.keys().then(function (keys) {
+        keys.forEach(function (k) { caches.delete(k); });
+      });
+    }
+
+    // Flutter fires this once the first frame is painted; drop the boot screen.
+    window.addEventListener('flutter-first-frame', function () {
+      var boot = document.getElementById('boot');
+      if (boot) boot.remove();
+    });
+
+    // If nothing paints within 30s, tell the user what to try instead of
+    // leaving a blank page (usually a cached old build or blocked WebGL).
+    setTimeout(function () {
+      var boot = document.getElementById('boot');
+      if (!boot || !boot.parentNode) return;
+      var msg = boot.querySelector('p');
+      if (msg) {
+        msg.innerHTML = 'يستغرق التحميل وقتاً أطول من المتوقّع. ' +
+          'حدّث الصفحة (Ctrl+F5)، أو جرّب متصفح Chrome حديث، ' +
+          'وتأكد من تفعيل تسريع العتاد (WebGL).';
+        msg.style.color = '#b23b3b';
+        msg.style.maxWidth = '340px';
+        msg.style.textAlign = 'center';
+      }
+    }, 30000);
+  </script>
 </body>
 </html>
