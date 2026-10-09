@@ -16,7 +16,7 @@ final class Permissions
         'users' => ['view', 'create', 'update', 'delete', 'impersonate'],
         'roles' => ['view', 'create', 'update', 'delete', 'assign'],
         'students' => ['view', 'create', 'update', 'delete', 'promote', 'view-profile'],
-        'teachers' => ['view', 'create', 'update', 'delete', 'assign'],
+        'teachers' => ['view', 'create', 'update', 'delete', 'assign', 'my-assignments'],
         'classes' => ['view', 'create', 'update', 'delete'],
         'subjects' => ['view', 'create', 'update', 'delete'],
         'sessions' => ['view', 'create', 'update', 'delete'],

@@ -4,6 +4,7 @@ namespace App\Support\Tenancy;
 
 use App\Models\Organization;
 use App\Support\Tenancy\Contracts\TenantResolver;
+use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 
 /**
@@ -13,16 +14,24 @@ use Illuminate\Http\Request;
  *  - Platform admins may switch tenant with the X-Tenant-Id header.
  *  - Regular users are locked to their own tenant_id.
  *  - A user with no tenant (pure platform staff) resolves to null.
+ *
+ * The request is pulled from the container on every call rather than captured
+ * in the constructor: this resolver is a singleton, and under long-running
+ * runtimes (Octane, queued test suites) the request instance is rebound per
+ * request, so holding one would resolve against a stale, possibly unauthenticated
+ * request.
  */
 class RequestTenantResolver implements TenantResolver
 {
-    public function __construct(protected Request $request)
+    protected function request(): Request
     {
+        return Container::getInstance()->make('request');
     }
 
     public function resolve(): ?Organization
     {
-        $user = $this->request->user();
+        $request = $this->request();
+        $user = $request->user();
 
         if ($user === null) {
             return null;
@@ -31,7 +40,7 @@ class RequestTenantResolver implements TenantResolver
         $model = config('tenancy.tenant_model', Organization::class);
 
         if ($this->isPlatformAdmin($user)) {
-            $headerId = $this->request->header(config('tenancy.header'));
+            $headerId = $request->header(config('tenancy.header'));
 
             if ($headerId !== null && $headerId !== '') {
                 return $model::query()->find($headerId);

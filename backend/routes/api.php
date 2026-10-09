@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\FinanceController;
 use App\Http\Controllers\Api\GuardianController;
+use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\MiniAppController;
 use App\Http\Controllers\Api\NotificationController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Api\SportsLeagueController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\TeacherController;
+use App\Http\Controllers\Api\TeacherDashboardController;
 use App\Http\Controllers\Api\TeachingController;
 use App\Http\Controllers\Api\TwoFactorController;
 use Illuminate\Support\Facades\Route;
@@ -195,6 +197,8 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware('permission:teachers.create');
             Route::get('teachers/my-assignments', [TeacherController::class, 'myAssignments'])
                 ->middleware('permission:teachers.view');
+            Route::get('teachers/dashboard', [TeacherDashboardController::class, 'show'])
+                ->middleware('permission:teachers.my-assignments');
             Route::get('teachers/{teacher}', [TeacherController::class, 'show'])
                 ->middleware('permission:teachers.view');
             Route::put('teachers/{teacher}', [TeacherController::class, 'update'])
@@ -282,6 +286,14 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware('permission:reports.view');
             Route::get('students/{student}/balance', [FinanceController::class, 'studentBalance'])
                 ->middleware('permission:fees.view');
+
+            // ---- Bulk import (Excel/CSV templates) --------------------
+            Route::get('imports/templates', [ImportController::class, 'templates'])
+                ->middleware('permission:students.view');
+            Route::get('imports/templates/{type}', [ImportController::class, 'template'])
+                ->middleware('permission:students.view');
+            Route::post('imports', [ImportController::class, 'store'])
+                ->middleware('permission:students.create');
 
             // ---- Parent & student portals -----------------------------
             Route::get('portal/parent', [PortalController::class, 'parent'])

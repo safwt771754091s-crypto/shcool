@@ -21,8 +21,7 @@ final class RoleDefinition
         public readonly array $permissions,
         public readonly bool $global = false,
         public readonly bool $system = true,
-    ) {
-    }
+    ) {}
 
     public static function fromLevel(string $type): int
     {

@@ -108,7 +108,7 @@ final class Roles
             new RoleDefinition(self::TEACHER, 'معلم', 4, [
                 'students.view', 'students.view-profile', 'classes.view',
                 'subjects.view', 'attendance.view', 'attendance.create', 'attendance.update',
-                'exams.view', 'exams.grades.enter', 'reports.view',
+                'exams.view', 'exams.grades.enter', 'reports.view', 'teachers.my-assignments',
                 'curriculum.view', 'teaching.view', 'teaching.prepare', 'teaching.submit',
                 'assignments.view', 'assignments.create', 'assignments.update', 'assignments.grade',
                 'sports.view', 'activities.view', 'activities.manage',
@@ -117,6 +117,7 @@ final class Roles
                 'students.view', 'classes.view', 'subjects.view',
                 'attendance.view', 'exams.view', 'exams.grades.enter',
                 'curriculum.view', 'teaching.view', 'assignments.view', 'activities.view',
+                'teachers.my-assignments',
             ]),
             new RoleDefinition(self::STUDENT_AFFAIRS, 'شؤون الطلاب', 4, [
                 'students.*', 'classes.view', 'attendance.*', 'reports.view',

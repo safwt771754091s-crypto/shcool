@@ -21,8 +21,7 @@ class RoleProvisioner
     public function __construct(
         protected TenantManager $tenants,
         protected PermissionRegistrar $registrar,
-    ) {
-    }
+    ) {}
 
     /**
      * Create every permission defined in Permissions::all().
