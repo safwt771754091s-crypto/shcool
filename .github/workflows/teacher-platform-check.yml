@@ -35,7 +35,7 @@ jobs:
               sys.exit("FAIL: teacher-platform/index.html is missing")
           html = page.read_text(encoding="utf-8")
           checks = {
-              "HTML doctype": "<!DOCTYPE html" in html.upper(),
+              "HTML doctype": "<!doctype html" in html.lower(),
               "Arabic RTL direction": 'dir="rtl"' in html,
               "Arabic language": 'lang="ar"' in html,
               "responsive viewport": 'name="viewport"' in html,
