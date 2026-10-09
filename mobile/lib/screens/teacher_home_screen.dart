@@ -5,6 +5,9 @@ import '../services/teacher_service.dart';
 import '../state/auth_provider.dart';
 import '../widgets/async_view.dart';
 import '../widgets/stat_card.dart';
+import 'attendance_register_screen.dart';
+import 'grade_entry_screen.dart';
+import 'national_ranking_screen.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
   const TeacherHomeScreen({super.key});
@@ -99,10 +102,53 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                _QuickAction(
+                  icon: Icons.fact_check_outlined,
+                  label: 'تسجيل حضور الحصة',
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const AttendanceRegisterScreen())),
+                ),
+                _QuickAction(
+                  icon: Icons.edit_note,
+                  label: 'رصد درجات اختبار',
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const GradeEntryScreen())),
+                ),
+                _QuickAction(
+                  icon: Icons.emoji_events_outlined,
+                  label: 'الترتيب الوطني',
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const NationalRankingScreen())),
+                ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(label),
+        trailing: const Icon(Icons.chevron_left),
+        onTap: onTap,
       ),
     );
   }

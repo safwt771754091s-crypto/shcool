@@ -52,7 +52,9 @@ class TeachingAssignment {
   TeachingAssignment({
     required this.id,
     this.subject,
+    this.subjectId,
     this.section,
+    this.sectionId,
     this.className,
     this.weeklyPeriods = 0,
     this.isHomeroom = false,
@@ -60,10 +62,18 @@ class TeachingAssignment {
 
   final int id;
   final String? subject;
+  final int? subjectId;
   final String? section;
+  final int? sectionId;
   final String? className;
   final int weeklyPeriods;
   final bool isHomeroom;
+
+  String get label {
+    final parts = [className, section].whereType<String>().toList();
+    final place = parts.isEmpty ? '' : ' (${parts.join(' - ')})';
+    return '${subject ?? ''}$place';
+  }
 
   factory TeachingAssignment.fromJson(Map<String, dynamic> json) {
     final sectionMap = (json['section'] as Map?)?.cast<String, dynamic>();
@@ -73,7 +83,11 @@ class TeachingAssignment {
     return TeachingAssignment(
       id: (json['id'] as num).toInt(),
       subject: subjectMap?['name']?.toString(),
+      subjectId:
+          ((json['subject_id'] ?? subjectMap?['id']) as num?)?.toInt(),
       section: sectionMap?['name']?.toString(),
+      sectionId: ((json['class_section_id'] ?? sectionMap?['id']) as num?)
+          ?.toInt(),
       className: schoolClass?['name']?.toString(),
       weeklyPeriods: (json['weekly_periods'] as num?)?.toInt() ?? 0,
       isHomeroom: json['is_homeroom'] == true,

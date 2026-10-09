@@ -72,6 +72,20 @@ class ApiClient {
             }),
           ));
 
+  /// Download a binary body (used by report exports: PDF/XLSX/CSV).
+  Future<List<int>> download(String path, {Map<String, dynamic>? query}) async {
+    try {
+      final response = await _dio.get<List<int>>(
+        path,
+        queryParameters: query,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return response.data ?? const [];
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    }
+  }
+
   /// POST with an explicit bearer token, bypassing the stored one. Used for the
   /// restricted 2FA challenge token.
   Future<dynamic> postWithToken(String path, String token, {Object? data}) =>

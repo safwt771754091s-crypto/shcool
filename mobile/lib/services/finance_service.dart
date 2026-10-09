@@ -100,4 +100,13 @@ class FinanceService {
         as Map<String, dynamic>;
     return ReportTable.fromJson((data['data'] as Map).cast<String, dynamic>());
   }
+
+  /// Download a report as raw bytes (format: pdf|xlsx|csv).
+  Future<List<int>> export(
+    String type, {
+    required String format,
+    Map<String, dynamic>? extra,
+  }) =>
+      _api.download('reports/export/$format',
+          query: {'type': type, ...?extra});
 }

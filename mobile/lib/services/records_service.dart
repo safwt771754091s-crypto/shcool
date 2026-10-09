@@ -1,12 +1,61 @@
 import '../core/network/api_client.dart';
 import '../models/attendance.dart';
 import '../models/exam.dart';
+import '../models/grade.dart';
+import '../models/register.dart';
+import '../models/student.dart';
 
 /// Attendance reports and exam/grade/result-sheet operations.
 class RecordsService {
   RecordsService(this._api);
 
   final ApiClient _api;
+
+  /// The students of a section, used to seed a fresh register.
+  Future<List<Student>> sectionStudents(int sectionId) async {
+    final data = await _api.get('students', query: {
+      'class_section_id': sectionId,
+    }) as Map<String, dynamic>;
+    final payload = data['data'];
+    final rows = (payload is Map && payload['data'] is List)
+        ? payload['data'] as List
+        : payload as List? ?? const [];
+    return rows
+        .map((e) => Student.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
+  }
+
+  /// A previously-saved register for a section on a date, or null.
+  Future<AttendanceSession?> attendanceSession({
+    required int sectionId,
+    required String date,
+    String period = 'daily',
+  }) async {
+    final data = await _api.get('attendance/session', query: {
+      'class_section_id': sectionId,
+      'attendance_date': date,
+      'period': period,
+    }) as Map<String, dynamic>;
+    final payload = data['data'];
+    if (payload is! Map) return null;
+    return AttendanceSession.fromJson(payload.cast<String, dynamic>());
+  }
+
+  Future<void> takeRegister({
+    required int sectionId,
+    required String date,
+    required List<RegisterEntry> entries,
+    String period = 'daily',
+    String? notes,
+  }) async {
+    await _api.post('attendance/register', data: {
+      'class_section_id': sectionId,
+      'attendance_date': date,
+      'period': period,
+      'notes': ?notes,
+      'entries': [for (final e in entries) e.toPayload()],
+    });
+  }
 
   Future<List<AttendanceReportRow>> attendanceReport({
     required int sectionId,
@@ -85,6 +134,16 @@ class RecordsService {
     required List<Map<String, dynamic>> rows,
   }) async {
     await _api.post('exams/$examId/grades', data: {'rows': rows});
+  }
+
+  /// The exam with its already-recorded grades (used to seed the entry sheet).
+  Future<List<GradeEntry>> examGrades(int examId) async {
+    final data = await _api.get('exams/$examId') as Map<String, dynamic>;
+    final payload = (data['data'] as Map).cast<String, dynamic>();
+    final grades = payload['grades'] as List? ?? const [];
+    return grades
+        .map((e) => GradeEntry.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
   }
 
   Future<void> publishExam(int examId) async {

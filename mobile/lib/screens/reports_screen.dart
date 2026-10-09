@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,6 +29,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   String _type = 'students';
   late Future<ReportTable> _future;
+  bool _exporting = false;
 
   @override
   void initState() {
@@ -36,10 +40,61 @@ class _ReportsScreenState extends State<ReportsScreen> {
   void _reload() =>
       setState(() => _future = context.read<FinanceService>().report(_type));
 
+  Future<void> _export(String format) async {
+    setState(() => _exporting = true);
+    try {
+      final bytes = await context.read<FinanceService>().export(
+            _type,
+            format: format,
+          );
+      final fileName = '$_type-${DateTime.now().millisecondsSinceEpoch}.$format';
+      final mime = switch (format) {
+        'pdf' => 'application/pdf',
+        'xlsx' =>
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        _ => 'text/csv',
+      };
+      await FilePicker.saveFile(
+        fileName: fileName,
+        bytes: Uint8List.fromList(bytes),
+        mimeType: mime,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('تم تصدير التقرير ($format).')));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('تعذّر التصدير: $e')));
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('التقارير')),
+      appBar: AppBar(
+        title: const Text('التقارير'),
+        actions: [
+          PopupMenuButton<String>(
+            enabled: !_exporting,
+            tooltip: 'تصدير',
+            icon: _exporting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.download_outlined),
+            onSelected: _export,
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'pdf', child: Text('PDF')),
+              PopupMenuItem(value: 'xlsx', child: Text('Excel (XLSX)')),
+              PopupMenuItem(value: 'csv', child: Text('CSV')),
+            ],
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(

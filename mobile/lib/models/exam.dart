@@ -12,7 +12,9 @@ class Exam {
     required this.id,
     required this.title,
     this.subject,
+    this.subjectId,
     this.section,
+    this.sectionId,
     this.className,
     this.type,
     this.heldOn,
@@ -25,7 +27,9 @@ class Exam {
   final int id;
   final String title;
   final String? subject;
+  final int? subjectId;
   final String? section;
+  final int? sectionId;
   final String? className;
   final String? type;
   final String? heldOn;
@@ -52,7 +56,10 @@ class Exam {
       id: (json['id'] as num).toInt(),
       title: json['title']?.toString() ?? '',
       subject: subject?['name']?.toString(),
+      subjectId: ((json['subject_id'] ?? subject?['id']) as num?)?.toInt(),
       section: section?['name']?.toString(),
+      sectionId:
+          ((json['class_section_id'] ?? section?['id']) as num?)?.toInt(),
       className: schoolClass?['name']?.toString(),
       type: json['type'] as String?,
       heldOn: json['held_on'] as String?,

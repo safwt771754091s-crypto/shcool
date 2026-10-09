@@ -7,6 +7,8 @@ import '../services/sync_service.dart';
 import '../state/auth_provider.dart';
 import '../widgets/async_view.dart';
 import '../widgets/stat_card.dart';
+import 'national_ranking_screen.dart';
+import 'notifications_screen.dart';
 
 class ParentPortalScreen extends StatefulWidget {
   const ParentPortalScreen({super.key});
@@ -57,6 +59,25 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
               children: [
                 const SyncBanner(),
                 ...children.map((c) => _ChildCard(child: c)),
+                const SizedBox(height: 8),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.emoji_events_outlined),
+                    title: const Text('ترتيب الأبناء في المسابقات'),
+                    trailing: const Icon(Icons.chevron_left),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const NationalRankingScreen())),
+                  ),
+                ),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.notifications_outlined),
+                    title: const Text('إشعاراتي'),
+                    trailing: const Icon(Icons.chevron_left),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const NotificationsScreen())),
+                  ),
+                ),
               ],
             ),
           );

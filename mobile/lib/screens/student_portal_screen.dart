@@ -6,6 +6,8 @@ import '../services/portal_service.dart';
 import '../state/auth_provider.dart';
 import '../widgets/async_view.dart';
 import '../widgets/stat_card.dart';
+import 'national_ranking_screen.dart';
+import 'notifications_screen.dart';
 
 class StudentPortalScreen extends StatefulWidget {
   const StudentPortalScreen({super.key});
@@ -108,6 +110,25 @@ class _StudentPortalScreenState extends State<StudentPortalScreen> {
                         ),
                       )),
                 ],
+                const SizedBox(height: 24),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.emoji_events_outlined),
+                    title: const Text('ترتيبي في المسابقات'),
+                    trailing: const Icon(Icons.chevron_left),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const NationalRankingScreen())),
+                  ),
+                ),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.notifications_outlined),
+                    title: const Text('إشعاراتي'),
+                    trailing: const Icon(Icons.chevron_left),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const NotificationsScreen())),
+                  ),
+                ),
               ],
             ),
           );

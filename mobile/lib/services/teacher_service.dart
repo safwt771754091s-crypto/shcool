@@ -1,4 +1,5 @@
 import '../core/network/api_client.dart';
+import '../models/teacher.dart';
 
 /// Consolidated teacher workspace (لوحة المعلم).
 class TeacherDashboard {
@@ -55,9 +56,12 @@ class TeacherService {
     return TeacherDashboard.fromJson(payload.cast<String, dynamic>());
   }
 
-  Future<List<Map<String, dynamic>>> myAssignments() async {
+  Future<List<TeachingAssignment>> myAssignments() async {
     final data = await _api.get('teachers/my-assignments') as Map<String, dynamic>;
     final payload = data['data'] as List? ?? const [];
-    return payload.map((e) => (e as Map).cast<String, dynamic>()).toList();
+    return payload
+        .map((e) =>
+            TeachingAssignment.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
   }
 }
