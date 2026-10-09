@@ -1,0 +1,49 @@
+name: Teacher Platform - Smoke Check
+
+on:
+  push:
+    branches:
+      - teacher-platform
+    paths:
+      - "teacher-platform/**"
+      - ".github/workflows/teacher-platform-check.yml"
+  pull_request:
+    branches:
+      - teacher-platform
+    paths:
+      - "teacher-platform/**"
+      - ".github/workflows/teacher-platform-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+      - name: Verify application entry point and RTL shell
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+
+          page = Path("teacher-platform/index.html")
+          if not page.is_file():
+              sys.exit("FAIL: teacher-platform/index.html is missing")
+          html = page.read_text(encoding="utf-8")
+          checks = {
+              "HTML doctype": "<!DOCTYPE html" in html.upper(),
+              "Arabic RTL direction": 'dir="rtl"' in html,
+              "Arabic language": 'lang="ar"' in html,
+              "responsive viewport": 'name="viewport"' in html,
+              "local persistence": "localStorage" in html,
+          }
+          for label, passed in checks.items():
+              print(f'{"PASS" if passed else "FAIL"}: {label}')
+          if not all(checks.values()):
+              sys.exit(1)
+          print(f"PASS: entry point exists ({page.stat().st_size} bytes)")
+          PY
