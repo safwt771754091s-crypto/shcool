@@ -17,6 +17,13 @@ MOBILE="$REPO_DIR/mobile"
 FLUTTER_BIN="${FLUTTER_BIN:-/workspace/tools/flutter/bin}"
 API_PORT="${API_PORT:-12000}"
 WEB_PORT="${WEB_PORT:-12001}"
+
+# The public work-1/work-2 hosts change on every sandbox reset, so derive the API
+# host from the runtime URL instead of hardcoding it. Override with API_PUBLIC.
+if [ -z "${API_PUBLIC:-}" ] && [ -n "${RUNTIME_URL:-}" ]; then
+  RUNTIME_ID="$(printf '%s' "$RUNTIME_URL" | sed -E 's#^https?://##; s#\.prod-runtime\.all-hands\.dev.*$##')"
+  [ -n "$RUNTIME_ID" ] && API_PUBLIC="https://work-1-${RUNTIME_ID}.prod-runtime.all-hands.dev"
+fi
 API_PUBLIC="${API_PUBLIC:-https://work-1-qgkkdtekkcsslwlv.prod-runtime.all-hands.dev}"
 
 echo "==> Ensuring services"
