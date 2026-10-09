@@ -110,6 +110,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2))
                           : const Text('تسجيل الدخول'),
                     ),
+                    const SizedBox(height: 24),
+                    Text(
+                      '${AppConfig.platformOwnerTitle}: ${AppConfig.platformOwner}',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),

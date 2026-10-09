@@ -149,11 +149,18 @@ class ReportController extends Controller
             table { width: 100%; border-collapse: collapse; }
             th, td { border: 1px solid #999; padding: 4px 6px; text-align: right; }
             th { background: #eee; }
+            footer { margin-top: 16px; text-align: center; color: #666; font-size: 10px; }
         </style></head>
         <body>
             <h1>{$report['title']}</h1>
             <table><thead><tr>{$head}</tr></thead><tbody>{$body}</tbody></table>
+            <footer>{$this->ownerFooter()}</footer>
         </body></html>
         HTML;
+    }
+
+    protected function ownerFooter(): string
+    {
+        return e(config('app.platform.owner_title').': '.config('app.platform.owner'));
     }
 }

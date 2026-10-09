@@ -380,14 +380,21 @@ FRESH=1 bash scripts/run_demo.sh
 bash scripts/run_demo.sh
 ```
 
-- **واجهة الويب:** منفذ `12001`
+- **واجهة الويب (المنصة):** منفذ `12001`
+  - الرابط العام: `https://work-2-qgkkdtekkcsslwlv.prod-runtime.all-hands.dev/`
+  - الرابط المختصر للمراقبة الشاملة: `.../#/monitor`
 - **واجهة الـ API:** منفذ `12000` (البادئة `/api/v1`)
+  - الرابط العام: `https://work-1-qgkkdtekkcsslwlv.prod-runtime.all-hands.dev/api/v1`
+
+> ملاحظة: يجب فتح رابط الواجهة (`work-2`) لتظهر المنصة. فتح رابط الـ API (`work-1`)
+> مباشرةً يعرض رد JSON فقط، لأن هذا منفذ الخدمة الخلفية.
 
 ### حسابات العرض (كلمة المرور للجميع: `password`)
 
 | الدور | البريد |
 |------|--------|
-| مالك المنصة | `owner@school-platform.local` |
+| مالك المنصة (المهندس صفوت البريهي) | `owner@school-platform.local` |
+| وزير التربية (مراقبة للقراءة فقط) | `minister@school-platform.local` |
 | مدير مدرسة | `manager@school-platform.local` |
 | معلم | `teacher1@school-platform.local` |
 | ولي أمر | `parent@school-platform.local` |

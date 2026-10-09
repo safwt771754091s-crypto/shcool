@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\GuardianController;
 use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\MiniAppController;
+use App\Http\Controllers\Api\MonitoringController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\PortalController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\TeacherDashboardController;
 use App\Http\Controllers\Api\TeachingController;
 use App\Http\Controllers\Api\TwoFactorController;
+use App\Http\Controllers\Api\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -142,6 +144,28 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware('permission:activities.view');
             Route::post('activities/{activity}/submit', [ActivityController::class, 'submit'])
                 ->middleware('permission:activities.submit');
+
+            // ---- Platform monitoring (read-only) ------------------------
+            // The whole-country view for the Minister of Education
+            // (وزير التربية) and the platform owner. Strictly read-only.
+            Route::prefix('monitoring')->group(function (): void {
+                Route::get('overview', [MonitoringController::class, 'overview'])
+                    ->middleware('permission:platform.monitor');
+                Route::get('tree', [MonitoringController::class, 'tree'])
+                    ->middleware('permission:platform.monitor');
+                Route::get('schools', [MonitoringController::class, 'schools'])
+                    ->middleware('permission:platform.monitor');
+            });
+
+            // ---- Staff accounts & role assignment ---------------------
+            // Create a manager/staff account inside an organization and grant
+            // a tenant-scoped role (school_manager, teacher, accountant, ...).
+            Route::get('users', [UserManagementController::class, 'index'])
+                ->middleware('permission:users.view');
+            Route::post('users', [UserManagementController::class, 'store'])
+                ->middleware('permission:users.create');
+            Route::post('users/{user}/roles', [UserManagementController::class, 'assignRoleToUser'])
+                ->middleware('permission:roles.assign');
 
             // ---- Mini-app registry ------------------------------------
             Route::get('apps', [MiniAppController::class, 'index'])

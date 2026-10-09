@@ -20,7 +20,7 @@ class PlatformAdminSeeder extends Seeder
         $owner = User::query()->updateOrCreate(
             ['email' => 'owner@school-platform.local'],
             [
-                'name' => 'مالك المنصة',
+                'name' => 'المهندس صفوت البريهي',
                 'password' => Hash::make('password'),
                 'is_active' => true,
                 'is_platform_admin' => true,
@@ -42,6 +42,23 @@ class PlatformAdminSeeder extends Seeder
         );
 
         $admin->assignRole(Roles::SUPER_ADMIN);
+
+        // The Minister of Education: a read-only, platform-wide monitoring
+        // account. Platform admin so the tenant is resolved to the global team
+        // (whole-country scope); the `minister` role grants only read-only
+        // permissions plus `platform.monitor`.
+        $minister = User::query()->updateOrCreate(
+            ['email' => 'minister@school-platform.local'],
+            [
+                'name' => 'وزير التربية',
+                'password' => Hash::make('password'),
+                'is_active' => true,
+                'is_platform_admin' => true,
+                'email_verified_at' => now(),
+            ],
+        );
+
+        $minister->assignRole(Roles::MINISTER);
 
         // A sample school manager inside the seeded school.
         $school = Organization::query()->where('type', Organization::TYPE_SCHOOL)->first();

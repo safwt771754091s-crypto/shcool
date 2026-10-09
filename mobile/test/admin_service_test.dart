@@ -92,4 +92,60 @@ void main() {
     final created = await service.createApp(name: 'المكتبة', slug: 'library');
     expect(created.slug, 'library');
   });
+
+  test('monitoringOverview() parses totals and per-school rows', () async {
+    final adapter = FakeAdapter((_) => jsonResponse({
+          'data': {
+            'totals': {'schools': 2, 'students': 15, 'teachers': 8},
+            'per_school': [
+              {'id': 4, 'name': 'مدرسة النجاح', 'code': 'SCH-1', 'students': 10, 'teachers': 5},
+            ],
+            'generated_at': '2026-10-09T00:00:00+00:00',
+          },
+        }));
+
+    final service = AdminService(ApiClient(FakeTokenStore(), dio: fakeDio(adapter)));
+    final overview = await service.monitoringOverview();
+
+    expect(overview.total('schools'), 2);
+    expect(overview.total('students'), 15);
+    expect(overview.perSchool.single.name, 'مدرسة النجاح');
+    expect(overview.perSchool.single.students, 10);
+  });
+
+  test('users() parses a paginated staff list', () async {
+    final adapter = FakeAdapter((_) => jsonResponse({
+          'data': {
+            'data': [
+              {'id': 5, 'name': 'مدير', 'email': 'm@x.y', 'tenant_id': 4, 'roles': ['school_manager']},
+            ],
+          },
+        }));
+
+    final service = AdminService(ApiClient(FakeTokenStore(), dio: fakeDio(adapter)));
+    final users = await service.users();
+
+    expect(users.single.email, 'm@x.y');
+    expect(users.single.roles, ['school_manager']);
+  });
+
+  test('createUser() posts the role and organization', () async {
+    final adapter = FakeAdapter((_) => jsonResponse({
+          'data': {'id': 9, 'name': 'معلم', 'email': 't@x.y', 'roles': ['teacher']},
+        }, statusCode: 201));
+
+    final service = AdminService(ApiClient(FakeTokenStore(), dio: fakeDio(adapter)));
+    final created = await service.createUser(
+      name: 'معلم',
+      email: 't@x.y',
+      password: 'password123',
+      role: 'teacher',
+      organizationId: 4,
+    );
+
+    expect(created.id, 9);
+    final sent = adapter.lastRequest!.data as Map<String, dynamic>;
+    expect(sent['role'], 'teacher');
+    expect(sent['organization_id'], 4);
+  });
 }

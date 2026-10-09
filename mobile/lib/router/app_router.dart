@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
+import '../screens/monitoring_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/two_factor_screen.dart';
 
@@ -12,5 +13,7 @@ final appRouter = GoRouter(
     GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
     GoRoute(path: '/2fa', builder: (_, _) => const TwoFactorScreen()),
     GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
+    // Shareable, read-only monitoring link (وزير التربية / المالك).
+    GoRoute(path: '/monitor', builder: (_, _) => const MonitoringScreen()),
   ],
 );

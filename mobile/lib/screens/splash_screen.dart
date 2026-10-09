@@ -41,6 +41,11 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 16),
             Text(AppConfig.appName,
                 style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 8),
+            Text(
+              '${AppConfig.platformOwnerTitle}: ${AppConfig.platformOwner}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             const SizedBox(height: 24),
             const CircularProgressIndicator(),
           ],

@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Platform Owner (مالك المنصة)
+    |--------------------------------------------------------------------------
+    | Attribution shown on the login screen, dashboards and on every generated
+    | report/export footer.
+    */
+
+    'platform' => [
+        'owner' => env('PLATFORM_OWNER', 'المهندس صفوت البريهي'),
+        'owner_title' => env('PLATFORM_OWNER_TITLE', 'مالك المنصة'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

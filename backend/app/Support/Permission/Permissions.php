@@ -44,7 +44,7 @@ final class Permissions
         'apps' => ['view', 'manage', 'publish'],
 
         // Platform ownership: reserved for the owner account.
-        'platform' => ['view', 'manage', 'manage-admins', 'impersonate'],
+        'platform' => ['view', 'manage', 'manage-admins', 'impersonate', 'monitor'],
     ];
 
     /**

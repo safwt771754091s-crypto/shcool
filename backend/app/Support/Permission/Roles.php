@@ -28,6 +28,13 @@ final class Roles
 
     public const DIRECTORATE_ADMIN = 'directorate_admin';
 
+    /**
+     * Minister of Education (وزير التربية): a read-only, platform-wide
+     * monitoring account. Sees the whole organisation tree and every roll-up
+     * report, but can never create, edit or delete anything.
+     */
+    public const MINISTER = 'minister';
+
     // Tenant-scoped roles (level 4-5).
     public const SCHOOL_MANAGER = 'school_manager';
 
@@ -68,6 +75,19 @@ final class Roles
                 'notifications.*', 'students.view', 'teachers.view',
                 'apps.view', 'apps.publish', 'sports.*', 'activities.*',
                 'curriculum.view', 'teaching.view', 'reports.view',
+            ], global: true),
+            // Read-only monitoring: the whole tree plus every roll-up report,
+            // but no create/update/delete permissions anywhere.
+            new RoleDefinition(self::MINISTER, 'وزير التربية', 1, [
+                'platform.monitor',
+                'organizations.view', 'users.view', 'roles.view', 'audit.view',
+                'reports.view', 'reports.export', 'settings.view',
+                'students.view', 'teachers.view', 'classes.view',
+                'attendance.view', 'attendance.report',
+                'exams.view', 'fees.view', 'invoices.view', 'payments.view',
+                'parents.view', 'curriculum.view', 'teaching.view',
+                'apps.view', 'sports.view', 'activities.view',
+                'notifications.view',
             ], global: true),
             new RoleDefinition(self::GOVERNORATE_ADMIN, 'مدير المحافظة', 2, [
                 'organizations.view', 'organizations.create', 'organizations.update',

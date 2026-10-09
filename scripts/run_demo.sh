@@ -51,6 +51,7 @@ echo
 echo "Open:  $API_PUBLIC  (swap host for the web host if API_PUBLIC differs)"
 echo "Demo logins (password: password):"
 echo "  owner@school-platform.local    (owner / ministry level)"
+echo "  minister@school-platform.local (وزير التربية — read-only monitoring)"
 echo "  manager@school-platform.local  (school manager)"
 echo "  teacher1@school-platform.local (teacher)"
 echo "  parent@school-platform.local   (guardian)"

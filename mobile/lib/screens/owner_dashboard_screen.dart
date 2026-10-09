@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/config/app_config.dart';
 import '../state/auth_provider.dart';
 import 'admin_hierarchy_screen.dart';
 import 'mini_apps_screen.dart';
+import 'monitoring_screen.dart';
 
 /// Owner/ministry landing dashboard: quick access to the administrative
 /// hierarchy and the mini-app registry, plus the signed-in identity.
@@ -30,28 +32,30 @@ class OwnerDashboardScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           Card(
+            color: Theme.of(context).colorScheme.primaryContainer,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 26,
-                    child: Text(
-                      (user?.name.isNotEmpty ?? false)
-                          ? user!.name.substring(0, 1)
-                          : '؟',
-                      style: const TextStyle(fontSize: 20),
-                    ),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    child: const Icon(Icons.workspace_premium_outlined,
+                        color: Colors.white),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(user?.name ?? '',
+                        Text(AppConfig.platformOwnerTitle,
+                            style: Theme.of(context).textTheme.labelMedium),
+                        const SizedBox(height: 4),
+                        Text(AppConfig.platformOwner,
                             style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 4),
-                        Text(user?.email ?? ''),
+                        Text(user?.email ?? '',
+                            style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ),
                   ),
@@ -86,6 +90,16 @@ class OwnerDashboardScreen extends StatelessWidget {
             subtitle: 'إنشاء تطبيق مصغّر ونشره على الجهات',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const MiniAppsScreen()),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const _SectionTitle('المراقبة'),
+          _DashboardTile(
+            icon: Icons.monitor_heart_outlined,
+            title: 'المراقبة الشاملة للمنصة',
+            subtitle: 'نظرة قراءة فقط على كل المحافظات والمدارس والكشوف',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const MonitoringScreen()),
             ),
           ),
         ],
