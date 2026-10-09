@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\Tenancy\Middleware\InitializeTenancy;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // This is an API-only backend with no named "login" web route. The
+        // framework default eagerly calls route('login') when an
+        // unauthenticated request is rejected, which throws
+        // RouteNotFoundException (500). Disable the guest redirect so the
+        // AuthenticationException is rendered as a 401 JSON response.
+        $middleware->redirectGuestsTo(fn () => null);
+
         $middleware->api(prepend: [
             EnsureFrontendRequestsAreStateful::class,
             InitializeTenancy::class,
@@ -32,4 +40,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // This is an API-only backend: never try to redirect an unauthenticated
+        // request to a named "login" web route (which does not exist), which
+        // would surface as a 500 for clients that omit the Accept header.
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+
+            return null;
+        });
     })->create();

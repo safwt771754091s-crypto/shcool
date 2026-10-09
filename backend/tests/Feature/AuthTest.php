@@ -124,4 +124,13 @@ class AuthTest extends TestCase
             'password' => 'wrong',
         ])->assertStatus(429);
     }
+
+    public function test_unauthenticated_api_request_returns_401_without_accept_header(): void
+    {
+        // Regression: the framework's default guest redirect called route('login'),
+        // which does not exist in this API-only app, turning a 401 into a 500.
+        $this->get('/api/v1/organizations/tree', ['Accept' => '*/*'])
+            ->assertStatus(401)
+            ->assertJson(['message' => 'Unauthenticated.']);
+    }
 }
