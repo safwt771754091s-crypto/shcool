@@ -400,6 +400,37 @@ bash scripts/run_demo.sh
 | ولي أمر | `parent@school-platform.local` |
 | طالب | `student@school-platform.local` |
 
+## النشر (Build & Publish)
+
+### واجهة الويب
+يُبنى الويب بملف تعريفي واحد لمضيف الـ API العام:
+
+```bash
+cd mobile
+flutter build web --release \
+  --dart-define=API_BASE_URL="https://<api-host>/api/v1"
+# الناتج: mobile/build/web  (يُقدَّم عبر tool/serve_web.py أو أي خادم ثابت)
+```
+
+### تطبيق أندرويد (APK)
+سكربت واحد يجهّز السلسلة (JDK 21 + Android SDK + NDK) ويبني APK الإصدار:
+
+```bash
+API_PUBLIC=https://<api-host> bash scripts/build_android.sh
+# الناتج: mobile/build/app/outputs/flutter-apk/app-release.apk
+```
+
+> حزمة التطبيق `com.schoolplatform.school_app`، والحد الأدنى `minSdk=24`.
+> البناء الحالي موقّع بمفاتيح التصحيح (debug)؛ للنشر على Google Play أنشئ
+> `keystore` خاصاً ومرّر `key.properties` إلى `mobile/android/app/build.gradle.kts`.
+
+### ملاحظة تشغيلية
+- مضيفا `work-1`/`work-2` العامّان يتغيّران عند كل إعادة تهيئة للبيئة، لذا يشتق
+  `scripts/run_demo.sh` و`scripts/build_android.sh` مضيف الـ API من متغيّر
+  `RUNTIME_URL` تلقائياً (ويمكن تجاوزه عبر `API_PUBLIC`).
+
 ## الخطوات التالية
 
-- ربط تطبيق Flutter بواجهات البوابات والإشعارات والوحدة المالية وقوالب الاستيراد، وإضافة لوحة الوزارة للترتيب الوطني.
+- توسيع لوحة الوزارة للترتيب الوطني وتقارير المقارنة بين المديريات.
+- ربط مزوّدي الإشعارات (SMS / WhatsApp Business) بمفاتيح الإنتاج وتشغيل الطوابير (Queues) في الإنتاج.
+
