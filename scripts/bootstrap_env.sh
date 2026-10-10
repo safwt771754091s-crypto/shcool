@@ -49,4 +49,10 @@ fi
 # 5. Run the demo (API + Flutter web) --------------------------------------
 echo ">> starting demo"
 bash "$ROOT/scripts/run_demo.sh"
+
+# 6. Keep it alive (restart services / re-bootstrap after a reset) ---------
+echo ">> starting watchdog"
+pkill -f "scripts/watchdog.sh" 2>/dev/null || true
+setsid bash "$ROOT/scripts/watchdog.sh" >/tmp/school_watchdog.log 2>&1 < /dev/null &
+
 echo "===== bootstrap done $(date -Is) ====="
