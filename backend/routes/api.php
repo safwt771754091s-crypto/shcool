@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AcademicController;
 use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamController;
@@ -331,6 +332,21 @@ Route::prefix('v1')->group(function (): void {
             Route::get('portal/parent', [PortalController::class, 'parent'])
                 ->middleware('role_or_permission:parent|parents.view');
             Route::get('portal/student', [PortalController::class, 'student']);
+
+            // ---- AI agents (وكلاء الذكاء الاصطناعي) --------------------
+            // Read-only assistants. The controller scopes conversations to the
+            // caller and each tool re-checks the caller's permissions, so a
+            // parent/student can only ever reach their own data.
+            Route::get('ai', [AiController::class, 'index'])
+                ->middleware('permission:ai.view');
+            Route::post('ai/conversations', [AiController::class, 'store'])
+                ->middleware('permission:ai.chat');
+            Route::get('ai/conversations/{conversation}', [AiController::class, 'show'])
+                ->middleware('permission:ai.view');
+            Route::post('ai/conversations/{conversation}/messages', [AiController::class, 'message'])
+                ->middleware('permission:ai.chat');
+            Route::delete('ai/conversations/{conversation}', [AiController::class, 'destroy'])
+                ->middleware('permission:ai.chat');
         });
     });
 });

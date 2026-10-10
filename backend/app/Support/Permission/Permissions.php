@@ -43,6 +43,9 @@ final class Permissions
         // Mini-app registry (سجل التطبيقات المصغّرة).
         'apps' => ['view', 'manage', 'publish'],
 
+        // AI agents (وكلاء الذكاء الاصطناعي) — read-only assistants.
+        'ai' => ['view', 'chat', 'manage'],
+
         // Platform ownership: reserved for the owner account.
         'platform' => ['view', 'manage', 'manage-admins', 'impersonate', 'monitor'],
     ];

@@ -7,6 +7,7 @@ import '../widgets/async_view.dart';
 import '../widgets/stat_card.dart';
 import 'attendance_register_screen.dart';
 import 'grade_entry_screen.dart';
+import 'ai_assistant_screen.dart';
 import 'national_ranking_screen.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
@@ -120,6 +121,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   label: 'الترتيب الوطني',
                   onTap: () => Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => const NationalRankingScreen())),
+                ),
+                _QuickAction(
+                  icon: Icons.smart_toy_outlined,
+                  label: 'مساعد المعلم (ذكاء اصطناعي)',
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const AiAssistantScreen(initialAgent: 'teacher_assistant'))),
                 ),
               ],
             ),

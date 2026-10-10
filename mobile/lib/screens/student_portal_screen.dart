@@ -8,6 +8,7 @@ import '../widgets/async_view.dart';
 import '../widgets/stat_card.dart';
 import 'national_ranking_screen.dart';
 import 'notifications_screen.dart';
+import 'ai_assistant_screen.dart';
 
 class StudentPortalScreen extends StatefulWidget {
   const StudentPortalScreen({super.key});
@@ -118,6 +119,16 @@ class _StudentPortalScreenState extends State<StudentPortalScreen> {
                     trailing: const Icon(Icons.chevron_left),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const NationalRankingScreen())),
+                  ),
+                ),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.smart_toy_outlined),
+                    title: const Text('مساعد الطالب (ذكاء اصطناعي)'),
+                    subtitle: const Text('اسأل عن نتيجتك وحضورك وترتيبك'),
+                    trailing: const Icon(Icons.chevron_left),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const AiAssistantScreen(initialAgent: 'student_assistant'))),
                   ),
                 ),
                 Card(

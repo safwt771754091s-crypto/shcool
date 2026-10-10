@@ -9,6 +9,7 @@ import '../widgets/async_view.dart';
 import '../widgets/stat_card.dart';
 import 'national_ranking_screen.dart';
 import 'notifications_screen.dart';
+import 'ai_assistant_screen.dart';
 
 class ParentPortalScreen extends StatefulWidget {
   const ParentPortalScreen({super.key});
@@ -67,6 +68,16 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
                     trailing: const Icon(Icons.chevron_left),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const NationalRankingScreen())),
+                  ),
+                ),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.smart_toy_outlined),
+                    title: const Text('مساعد ولي الأمر (ذكاء اصطناعي)'),
+                    subtitle: const Text('اسأل عن نتائج أبنائك وحضورهم ورسومهم'),
+                    trailing: const Icon(Icons.chevron_left),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const AiAssistantScreen(initialAgent: 'parent_assistant'))),
                   ),
                 ),
                 Card(

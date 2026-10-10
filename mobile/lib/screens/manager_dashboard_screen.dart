@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../state/auth_provider.dart';
 import 'academic_screen.dart';
+import 'ai_assistant_screen.dart';
 import 'attendance_report_screen.dart';
 import 'exams_screen.dart';
 import 'finance_screen.dart';
@@ -84,6 +85,21 @@ class ManagerDashboardScreen extends StatelessWidget {
                 ),
               ),
             ),
+          const SizedBox(height: 16),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: ListTile(
+              leading: const Icon(Icons.smart_toy_outlined),
+              title: const Text('وكلاء الذكاء الاصطناعي'),
+              subtitle: const Text('اسأل مساعد الإدارة عن أرقام مدرستك: الطلاب، الحضور، المالية'),
+              trailing: const Icon(Icons.chevron_left),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const AiAssistantScreen(initialAgent: 'manager_assistant')),
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           Text('الوحدات الأكاديمية',
               style: Theme.of(context).textTheme.titleMedium),

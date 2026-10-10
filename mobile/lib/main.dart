@@ -10,6 +10,7 @@ import 'core/theme/app_theme.dart';
 import 'router/app_router.dart';
 import 'services/academic_service.dart';
 import 'services/admin_service.dart';
+import 'services/ai_service.dart';
 import 'services/auth_service.dart';
 import 'services/competition_service.dart';
 import 'services/finance_service.dart';
@@ -51,6 +52,7 @@ class SchoolApp extends StatelessWidget {
         Provider<NotificationService>(create: (_) => NotificationService(api)),
         Provider<ImportService>(create: (_) => ImportService(api)),
         Provider<SyncService>(create: (_) => SyncService(api, OfflineStore())),
+        Provider<AiService>(create: (_) => AiService(api)),
         ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(AuthService(api, tokens))..bootstrap(),
         ),

@@ -56,6 +56,9 @@ class ApiClient {
   Future<dynamic> put(String path, {Object? data}) =>
       _request(() => _dio.put(path, data: data));
 
+  Future<dynamic> delete(String path, {Object? data}) =>
+      _request(() => _dio.delete(path, data: data));
+
   /// Multipart upload (used by bulk Excel/CSV import).
   Future<dynamic> upload(
     String path, {

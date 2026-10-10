@@ -66,7 +66,7 @@ final class Roles
             new RoleDefinition(self::SUPER_ADMIN, 'مدير المنصة', 1, [
                 'platform.view', 'platform.manage', 'platform.manage-admins', 'platform.impersonate',
                 'organizations.*', 'users.*', 'roles.*', 'reports.*', 'audit.view', 'settings.*',
-                'notifications.*', 'apps.*', 'sports.*', 'activities.*',
+                'notifications.*', 'apps.*', 'sports.*', 'activities.*', 'ai.*',
                 'students.*', 'teachers.*', 'attendance.*', 'exams.*', 'classes.*',
             ], global: true),
             new RoleDefinition(self::MINISTRY_ADMIN, 'مدير الوزارة', 1, [
@@ -74,7 +74,7 @@ final class Roles
                 'reports.view', 'reports.export', 'audit.view', 'settings.*',
                 'notifications.*', 'students.view', 'teachers.view',
                 'apps.view', 'apps.publish', 'sports.*', 'activities.*',
-                'curriculum.view', 'teaching.view', 'reports.view',
+                'curriculum.view', 'teaching.view', 'reports.view', 'ai.view', 'ai.chat',
             ], global: true),
             // Read-only monitoring: the whole tree plus every roll-up report,
             // but no create/update/delete permissions anywhere.
@@ -87,7 +87,7 @@ final class Roles
                 'exams.view', 'fees.view', 'invoices.view', 'payments.view',
                 'parents.view', 'curriculum.view', 'teaching.view',
                 'apps.view', 'sports.view', 'activities.view',
-                'notifications.view',
+                'notifications.view', 'ai.view', 'ai.chat',
             ], global: true),
             new RoleDefinition(self::GOVERNORATE_ADMIN, 'مدير المحافظة', 2, [
                 'organizations.view', 'organizations.create', 'organizations.update',
@@ -96,7 +96,7 @@ final class Roles
                 'students.view', 'teachers.view', 'attendance.report',
                 'exams.view', 'fees.view',
                 'apps.view', 'apps.publish', 'sports.view', 'sports.schedule',
-                'activities.view',
+                'activities.view', 'ai.view', 'ai.chat',
             ], global: true),
             new RoleDefinition(self::DIRECTORATE_ADMIN, 'مدير المديرية', 3, [
                 'organizations.view', 'organizations.update',
@@ -105,7 +105,7 @@ final class Roles
                 'students.*', 'teachers.*', 'attendance.*', 'exams.*',
                 'fees.view', 'classes.view',
                 'apps.view', 'apps.publish', 'sports.*', 'activities.*',
-                'curriculum.view', 'teaching.view', 'teaching.review',
+                'curriculum.view', 'teaching.view', 'teaching.review', 'ai.view', 'ai.chat',
             ], global: true),
 
             new RoleDefinition(self::SCHOOL_MANAGER, 'مدير المدرسة', 4, ['*']),
@@ -116,14 +116,14 @@ final class Roles
                 'fees.*', 'invoices.*', 'payments.*',
                 'reports.view', 'reports.export', 'notifications.view', 'notifications.send',
                 'curriculum.*', 'teaching.*', 'assignments.*',
-                'sports.*', 'activities.*', 'apps.view', 'apps.publish',
+                'sports.*', 'activities.*', 'apps.view', 'apps.publish', 'ai.view', 'ai.chat',
             ]),
             new RoleDefinition(self::VICE_PRINCIPAL, 'وكيل المدرسة', 4, [
                 'students.*', 'teachers.view', 'classes.*', 'subjects.view',
                 'sessions.view', 'attendance.*', 'exams.*', 'reports.view',
                 'notifications.view', 'notifications.send', 'parents.view',
                 'curriculum.*', 'teaching.view', 'teaching.review', 'teaching.approve',
-                'assignments.view', 'sports.view', 'sports.manage', 'activities.*',
+                'assignments.view', 'sports.view', 'sports.manage', 'activities.*', 'ai.view', 'ai.chat',
             ]),
             new RoleDefinition(self::TEACHER, 'معلم', 4, [
                 'students.view', 'students.view-profile', 'classes.view',
@@ -131,13 +131,13 @@ final class Roles
                 'exams.view', 'exams.grades.enter', 'reports.view', 'teachers.my-assignments',
                 'curriculum.view', 'teaching.view', 'teaching.prepare', 'teaching.submit',
                 'assignments.view', 'assignments.create', 'assignments.update', 'assignments.grade',
-                'sports.view', 'activities.view', 'activities.manage',
+                'sports.view', 'activities.view', 'activities.manage', 'ai.view', 'ai.chat',
             ]),
             new RoleDefinition(self::TEACHER_ASSISTANT, 'معلم مساعد', 4, [
                 'students.view', 'classes.view', 'subjects.view',
                 'attendance.view', 'exams.view', 'exams.grades.enter',
                 'curriculum.view', 'teaching.view', 'assignments.view', 'activities.view',
-                'teachers.my-assignments',
+                'teachers.my-assignments', 'ai.view', 'ai.chat',
             ]),
             new RoleDefinition(self::STUDENT_AFFAIRS, 'شؤون الطلاب', 4, [
                 'students.*', 'classes.view', 'attendance.*', 'reports.view',
@@ -154,10 +154,12 @@ final class Roles
                 'students.view-profile', 'exams.view', 'attendance.view',
                 'fees.view', 'invoices.view', 'payments.view', 'reports.view',
                 'teaching.view', 'assignments.view', 'activities.view', 'sports.view',
+                'ai.view', 'ai.chat',
             ]),
             new RoleDefinition(self::STUDENT, 'طالب', 4, [
                 'exams.view', 'attendance.view', 'fees.view', 'invoices.view',
                 'assignments.view', 'activities.view', 'activities.submit', 'sports.view',
+                'ai.view', 'ai.chat',
             ]),
         ];
     }
