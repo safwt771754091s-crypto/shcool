@@ -413,7 +413,9 @@ class AiToolbox
                 'outstanding_balance' => round((float) Invoice::query()
                     ->where('student_id', $student->id)->sum('balance'), 2),
                 'average_grade' => round((float) Grade::query()
-                    ->where('student_id', $student->id)->avg('score'), 1),
+                    ->where('student_id', $student->id)
+                    ->where('is_absent', false)
+                    ->avg('mark'), 1),
             ];
         }
 

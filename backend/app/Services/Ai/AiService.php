@@ -2,6 +2,7 @@
 
 namespace App\Services\Ai;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -31,9 +32,61 @@ class AiService
         $this->timeout = $timeout ?? (int) ($config['timeout'] ?? 60);
     }
 
+    /**
+     * Resolve the API key, transparently fetching a short-lived one when the
+     * gateway is configured that way (AI_KEY_REFRESH_URL). Static keys win.
+     */
+    public function key(): ?string
+    {
+        if (filled($this->apiKey)) {
+            return $this->apiKey;
+        }
+
+        $refreshUrl = config('ai.key_refresh_url');
+
+        if (blank($refreshUrl)) {
+            return null;
+        }
+
+        return Cache::remember(
+            'ai.managed_key',
+            max(30, (int) config('ai.key_ttl', 600)),
+            function () use ($refreshUrl) {
+                $request = Http::acceptJson()->timeout(10);
+                $secret = config('ai.key_refresh_secret');
+
+                if (filled($secret)) {
+                    $request = $request->withHeaders([
+                        (string) config('ai.key_refresh_header', 'X-Session-API-Key') => $secret,
+                    ]);
+                }
+
+                $response = $request->get($refreshUrl);
+
+                if ($response->failed()) {
+                    throw new RuntimeException(
+                        'AI key refresh failed: HTTP '.$response->status()
+                    );
+                }
+
+                return trim($response->body());
+            }
+        );
+    }
+
     public function isConfigured(): bool
     {
-        return (bool) config('ai.enabled', true) && filled($this->apiKey);
+        if (! (bool) config('ai.enabled', true)) {
+            return false;
+        }
+
+        try {
+            return filled($this->key());
+        } catch (RuntimeException) {
+            // A gateway/key-refresh outage must never break the endpoint; the
+            // caller degrades to the "not configured" notice instead.
+            return false;
+        }
     }
 
     public function model(): string
@@ -65,7 +118,7 @@ class AiService
             $payload['tool_choice'] = 'auto';
         }
 
-        $response = Http::withToken($this->apiKey)
+        $response = Http::withToken($this->key())
             ->acceptJson()
             ->timeout($this->timeout)
             ->post($this->baseUrl.'/chat/completions', $payload);

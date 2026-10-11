@@ -3,8 +3,13 @@
 namespace Tests\Unit\Ai;
 
 use App\Models\Attendance\Attendance;
+use App\Models\Attendance\AttendanceSession;
+use App\Models\Academic\Subject;
+use App\Models\Exam\Exam;
+use App\Models\Exam\Grade;
 use App\Models\Finance\Invoice;
 use App\Models\Organization;
+use App\Models\Student\Guardian;
 use App\Models\Student\Student;
 use App\Models\User;
 use App\Services\Ai\AiToolbox;
@@ -121,6 +126,92 @@ class AiToolboxTest extends TestCase
         $result = app(AiToolbox::class)->run('student_count', [], $this->manager());
 
         $this->assertSame(1, $result['total']);
+    }
+
+    public function test_my_children_tool_returns_attendance_and_marks(): void
+    {
+        $parent = $this->guardianWithChild();
+
+        $result = app(AiToolbox::class)->run('my_children', [], $parent);
+
+        $this->assertCount(1, $result['children']);
+        $child = $result['children'][0];
+        $this->assertSame('طالب ولي الأمر', $child['name']);
+        $this->assertSame(1, $child['attendance']['present']);
+        $this->assertSame(85.0, $child['average_grade']);
+    }
+
+    public function test_my_children_never_leaks_another_guardians_child(): void
+    {
+        $parent = $this->guardianWithChild();
+
+        $otherChild = Student::create([
+            'student_number' => 'S-OTHER',
+            'full_name' => 'طالب آخر',
+            'status' => Student::STATUS_ENROLLED,
+        ]);
+
+        $result = app(AiToolbox::class)->run('my_children', [], $parent);
+
+        $names = array_column($result['children'], 'name');
+        $this->assertSame(['طالب ولي الأمر'], $names);
+        $this->assertNotContains($otherChild->full_name, $names);
+    }
+
+    private function guardianWithChild(): User
+    {
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->school->id);
+
+        $parent = User::factory()->forTenant($this->school->id)->create();
+        $parent->assignRole(Roles::PARENT);
+
+        $class = \App\Models\Academic\SchoolClass::create(['name' => 'الأول', 'grade' => 1]);
+        $section = $class->sections()->create(['name' => 'أ']);
+
+        $student = Student::create([
+            'class_section_id' => $section->getKey(),
+            'student_number' => 'S-CHILD',
+            'full_name' => 'طالب ولي الأمر',
+            'status' => Student::STATUS_ENROLLED,
+        ]);
+
+        $guardian = Guardian::create([
+            'user_id' => $parent->getKey(),
+            'full_name' => $parent->name,
+        ]);
+
+        $guardian->students()->attach($student->getKey(), [
+            'tenant_id' => $this->school->id,
+            'relation' => 'father',
+            'is_primary' => true,
+        ]);
+
+        $session = AttendanceSession::create([
+            'class_section_id' => $section->getKey(),
+            'attendance_date' => now()->toDateString(),
+        ]);
+
+        Attendance::create([
+            'attendance_session_id' => $session->getKey(),
+            'student_id' => $student->getKey(),
+            'status' => Attendance::STATUS_PRESENT,
+        ]);
+
+        $exam = Exam::create([
+            'subject_id' => Subject::create(['name' => 'الرياضيات', 'code' => 'MATH', 'pass_mark' => 50, 'max_mark' => 100])->getKey(),
+            'class_section_id' => $section->getKey(),
+            'title' => 'اختبار',
+            'max_mark' => 100,
+            'pass_mark' => 50,
+        ]);
+
+        Grade::create([
+            'exam_id' => $exam->getKey(),
+            'student_id' => $student->getKey(),
+            'mark' => 85,
+        ]);
+
+        return $parent;
     }
 
     public function test_a_parent_cannot_reach_a_management_tool(): void

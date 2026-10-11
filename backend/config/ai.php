@@ -23,6 +23,26 @@ return [
 
     'model' => env('AI_MODEL', 'gpt-4o-mini'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Auto-refreshing API key (optional)
+    |--------------------------------------------------------------------------
+    |
+    | Some gateways hand out short-lived keys instead of a long-lived one. When
+    | AI_API_KEY is empty and AI_KEY_REFRESH_URL is set, the key is fetched from
+    | that URL (with AI_KEY_REFRESH_HEADER: AI_KEY_REFRESH_SECRET) and cached for
+    | AI_KEY_TTL seconds. This lets the demo run against a managed gateway whose
+    | key rotates, while a plain static AI_API_KEY keeps working unchanged.
+    |
+    */
+    'key_refresh_url' => env('AI_KEY_REFRESH_URL'),
+
+    'key_refresh_header' => env('AI_KEY_REFRESH_HEADER', 'X-Session-API-Key'),
+
+    'key_refresh_secret' => env('AI_KEY_REFRESH_SECRET'),
+
+    'key_ttl' => (int) env('AI_KEY_TTL', 600),
+
     // Seconds to wait for the upstream model.
     'timeout' => (int) env('AI_TIMEOUT', 60),
 
