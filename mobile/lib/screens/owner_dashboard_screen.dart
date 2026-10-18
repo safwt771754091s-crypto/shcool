@@ -9,6 +9,7 @@ import 'mini_apps_screen.dart';
 import 'monitoring_screen.dart';
 import 'national_ranking_screen.dart';
 import 'notifications_screen.dart';
+import '../widgets/install_app.dart';
 
 /// Owner/ministry landing dashboard: quick access to the administrative
 /// hierarchy and the mini-app registry, plus the signed-in identity.
@@ -24,6 +25,7 @@ class OwnerDashboardScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('لوحة المالك'),
         actions: [
+          const InstallAppButton(),
           IconButton(
             tooltip: 'تسجيل الخروج',
             icon: const Icon(Icons.logout),

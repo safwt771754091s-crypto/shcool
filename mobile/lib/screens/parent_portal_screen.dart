@@ -10,6 +10,7 @@ import '../widgets/stat_card.dart';
 import 'national_ranking_screen.dart';
 import 'notifications_screen.dart';
 import 'ai_assistant_screen.dart';
+import '../widgets/install_app.dart';
 
 class ParentPortalScreen extends StatefulWidget {
   const ParentPortalScreen({super.key});
@@ -39,6 +40,7 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
       appBar: AppBar(
         title: const Text('بوابة ولي الأمر'),
         actions: [
+          const InstallAppButton(),
           IconButton(
             tooltip: 'تسجيل الخروج',
             icon: const Icon(Icons.logout),

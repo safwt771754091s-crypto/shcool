@@ -5,6 +5,7 @@ import '../state/auth_provider.dart';
 import 'monitoring_screen.dart';
 import 'national_ranking_screen.dart';
 import 'notifications_screen.dart';
+import '../widgets/install_app.dart';
 
 /// Landing dashboard for the Minister of Education (وزير التربية): a single,
 /// read-only monitoring hub over the whole platform.
@@ -20,6 +21,7 @@ class MinisterDashboardScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('لوحة وزير التربية'),
         actions: [
+          const InstallAppButton(),
           IconButton(
             tooltip: 'تسجيل الخروج',
             icon: const Icon(Icons.logout),

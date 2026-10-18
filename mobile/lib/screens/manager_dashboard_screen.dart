@@ -13,6 +13,7 @@ import 'reports_screen.dart';
 import 'students_screen.dart';
 import 'teachers_screen.dart';
 import 'users_screen.dart';
+import '../widgets/install_app.dart';
 
 /// Landing dashboard for tenant-scoped leaders (school/branch manager, vice
 /// principal, accountant, secretary, student affairs).
@@ -33,6 +34,7 @@ class ManagerDashboardScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('لوحة المدير'),
         actions: [
+          const InstallAppButton(),
           IconButton(
             tooltip: 'تسجيل الخروج',
             icon: const Icon(Icons.logout),

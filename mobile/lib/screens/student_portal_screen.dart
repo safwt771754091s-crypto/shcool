@@ -9,6 +9,7 @@ import '../widgets/stat_card.dart';
 import 'national_ranking_screen.dart';
 import 'notifications_screen.dart';
 import 'ai_assistant_screen.dart';
+import '../widgets/install_app.dart';
 
 class StudentPortalScreen extends StatefulWidget {
   const StudentPortalScreen({super.key});
@@ -38,6 +39,7 @@ class _StudentPortalScreenState extends State<StudentPortalScreen> {
       appBar: AppBar(
         title: const Text('بوابة الطالب'),
         actions: [
+          const InstallAppButton(),
           IconButton(
             tooltip: 'تسجيل الخروج',
             icon: const Icon(Icons.logout),

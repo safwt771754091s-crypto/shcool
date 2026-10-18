@@ -9,6 +9,7 @@ import 'attendance_register_screen.dart';
 import 'grade_entry_screen.dart';
 import 'ai_assistant_screen.dart';
 import 'national_ranking_screen.dart';
+import '../widgets/install_app.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
   const TeacherHomeScreen({super.key});
@@ -38,6 +39,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       appBar: AppBar(
         title: const Text('لوحة المعلم'),
         actions: [
+          const InstallAppButton(),
           IconButton(
             tooltip: 'تسجيل الخروج',
             icon: const Icon(Icons.logout),

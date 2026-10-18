@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import 'core/config/app_config.dart';
 import 'core/network/api_client.dart';
+import 'core/pwa/install_prompt.dart'
+    if (dart.library.js_interop) 'core/pwa/install_prompt_web.dart';
 import 'core/storage/offline_store.dart';
 import 'core/storage/token_store.dart';
 import 'core/theme/app_theme.dart';
@@ -25,6 +27,9 @@ import 'services/teacher_service.dart';
 import 'state/auth_provider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Listen for the browser's install prompt (no-op off the web).
+  InstallPrompt.instance.start();
   runApp(const SchoolApp());
 }
 

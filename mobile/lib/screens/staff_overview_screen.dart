@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../state/auth_provider.dart';
+import '../widgets/install_app.dart';
 
 /// Landing view for administrative roles (مدير مدرسة، وزارة، حسابات...).
 ///
@@ -19,6 +20,7 @@ class StaffOverviewScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('لوحة التحكم'),
         actions: [
+          const InstallAppButton(),
           IconButton(
             tooltip: 'تسجيل الخروج',
             icon: const Icon(Icons.logout),

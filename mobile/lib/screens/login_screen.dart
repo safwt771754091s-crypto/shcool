@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../core/config/app_config.dart';
 import '../state/auth_provider.dart';
+import '../widgets/install_app.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +18,15 @@ class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _obscure = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Offer "install as app" once per device, shortly after arriving.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      maybeShowInstallOnFirstVisit(context);
+    });
+  }
 
   @override
   void dispose() {
@@ -111,6 +121,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           : const Text('تسجيل الدخول'),
                     ),
                     const SizedBox(height: 24),
+                    const InstallAppButton.entry(),
+                    const SizedBox(height: 16),
                     Text(
                       '${AppConfig.platformOwnerTitle}: ${AppConfig.platformOwner}',
                       textAlign: TextAlign.center,
