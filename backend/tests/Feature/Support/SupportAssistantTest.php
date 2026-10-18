@@ -7,6 +7,7 @@ use App\Models\Support\KbArticle;
 use App\Models\Support\SupportConversation;
 use App\Models\Support\SupportTicket;
 use App\Models\User;
+use App\Support\Permission\GlobalTeam;
 use App\Support\Permission\RoleProvisioner;
 use App\Support\Permission\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -218,6 +219,58 @@ class SupportAssistantTest extends TestCase
 
         $this->actingAs($this->staff(Roles::SCHOOL_MANAGER))
             ->getJson("/api/v1/support/assistant/conversations/{$conversationB->id}")
+            ->assertNotFound();
+    }
+
+    /**
+     * A platform-level user (owner/ministry) has no active tenant, so a
+     * tenant-scoped route binding would 404 a conversation they themselves
+     * created. Regression guard for the "open a chat, then it vanishes" bug.
+     */
+    public function test_a_platform_user_can_use_their_own_conversation(): void
+    {
+        config()->set('support.jev.api_key', null);
+        config()->set('support.claude.api_key', null);
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId(GlobalTeam::ID);
+        $user = User::factory()->platformAdmin()->create();
+        $user->assignRole(Roles::SUPER_ADMIN);
+
+        // The platform admin has no tenant: exactly the live-repro conditions.
+        $this->tenantManager()->forget();
+        $this->assertNull($this->tenantManager()->tenantId());
+
+        $this->actingAs($user);
+
+        $id = $this->postJson('/api/v1/support/assistant/conversations', [], ['Accept-Language' => 'ar'])
+            ->assertCreated()
+            ->json('data.id');
+
+        $this->getJson("/api/v1/support/assistant/conversations/{$id}")
+            ->assertOk()
+            ->assertJsonPath('data.conversation.id', $id);
+
+        $this->postJson(
+            "/api/v1/support/assistant/conversations/{$id}/messages",
+            ['message' => 'كيف أسدد الرسوم الدراسية؟'],
+            ['Accept-Language' => 'ar'],
+        )->assertOk()->assertJsonPath('data.intent', 'billing');
+    }
+
+    public function test_a_platform_user_cannot_open_another_users_conversation(): void
+    {
+        $other = $this->staff(Roles::SCHOOL_MANAGER);
+        $conversation = SupportConversation::create([
+            'user_id' => $other->getKey(),
+            'last_message_at' => now(),
+        ]);
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId(GlobalTeam::ID);
+        $user = User::factory()->platformAdmin()->create();
+        $user->assignRole(Roles::SUPER_ADMIN);
+
+        $this->actingAs($user)
+            ->getJson("/api/v1/support/assistant/conversations/{$conversation->id}")
             ->assertNotFound();
     }
 }

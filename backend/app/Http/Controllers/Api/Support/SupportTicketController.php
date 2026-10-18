@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Support;
 use App\Http\Controllers\Controller;
 use App\Models\Support\SupportTicket;
 use App\Models\Support\SupportTicketMessage;
+use App\Support\Tenancy\Scopes\TenantScope;
+use App\Support\Tenancy\TenantManager;
 use App\Services\Support\SupportTicketService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -68,13 +70,14 @@ class SupportTicketController extends Controller
         return response()->json(['data' => $ticket], 201);
     }
 
-    public function show(Request $request, SupportTicket $ticket): JsonResponse
+    public function show(Request $request, int $ticket): JsonResponse
     {
-        $this->authorizeView($request, $ticket);
+        $ticket = $this->findTicket($request, $ticket);
 
         $manages = $request->user()->can('support.manage');
 
         $messages = $ticket->messages()
+            ->withoutGlobalScope(TenantScope::class)
             ->when(! $manages, fn ($q) => $q->where('internal', false))
             ->get(['id', 'user_id', 'author_type', 'body', 'internal', 'created_at']);
 
@@ -89,9 +92,9 @@ class SupportTicketController extends Controller
         ]);
     }
 
-    public function reply(Request $request, SupportTicket $ticket): JsonResponse
+    public function reply(Request $request, int $ticket): JsonResponse
     {
-        $this->authorizeView($request, $ticket);
+        $ticket = $this->findTicket($request, $ticket);
 
         $manages = $request->user()->can('support.manage');
 
@@ -118,8 +121,10 @@ class SupportTicketController extends Controller
         return response()->json(['data' => $message], 201);
     }
 
-    public function update(Request $request, SupportTicket $ticket): JsonResponse
+    public function update(Request $request, int $ticket): JsonResponse
     {
+        $ticket = $this->findTicket($request, $ticket);
+
         // Desk management only.
         $validated = $request->validate([
             'status' => ['sometimes', Rule::in(SupportTicket::STATUSES)],
@@ -146,16 +151,33 @@ class SupportTicketController extends Controller
         return response()->json(['data' => $ticket->refresh()]);
     }
 
-    protected function authorizeView(Request $request, SupportTicket $ticket): void
+    /**
+     * Resolve a ticket the caller may see.
+     *
+     * The lookup stays tenant-aware so a school's staff can never reach another
+     * school's ticket, even with `support.manage`. A platform-level user
+     * (owner/ministry) has no active tenant, so the scoped binding would 404 a
+     * ticket they legitimately raised or may manage — hence the explicit bypass.
+     */
+    protected function findTicket(Request $request, int $id): SupportTicket
     {
         $user = $request->user();
+        $tenantId = app(TenantManager::class)->tenantId();
 
-        if ($user->can('support.manage')) {
-            return;
-        }
+        $query = $tenantId === null
+            ? SupportTicket::allTenants()
+            : SupportTicket::query();
 
-        if ($ticket->user_id !== $user->getKey()) {
+        $ticket = $query->find($id);
+
+        if ($ticket === null) {
             abort(404, 'التذكرة غير موجودة.');
         }
+
+        if (! $user->can('support.manage') && $ticket->user_id !== $user->getKey()) {
+            abort(404, 'التذكرة غير موجودة.');
+        }
+
+        return $ticket;
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\Support;
 
 use App\Http\Controllers\Controller;
 use App\Models\Support\SupportConversation;
+use App\Support\Tenancy\Scopes\TenantScope;
+use App\Support\Tenancy\TenantManager;
 use App\Services\Support\SupportAssistantService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,23 +58,24 @@ class SupportAssistantController extends Controller
         return response()->json(['data' => $conversation], 201);
     }
 
-    public function show(Request $request, SupportConversation $conversation): JsonResponse
+    public function show(Request $request, int $conversation): JsonResponse
     {
-        $this->authorizeConversation($request, $conversation);
+        $conversation = $this->findConversation($request, $conversation);
 
         return response()->json([
             'data' => [
                 'conversation' => $conversation->only(['id', 'title', 'intent', 'last_message_at']),
                 'messages' => $conversation->messages()
+                    ->withoutGlobalScope(TenantScope::class)
                     ->whereIn('role', ['user', 'assistant'])
                     ->get(['id', 'role', 'content', 'intent', 'confidence', 'sources', 'meta', 'created_at']),
             ],
         ]);
     }
 
-    public function message(Request $request, SupportConversation $conversation): JsonResponse
+    public function message(Request $request, int $conversation): JsonResponse
     {
-        $this->authorizeConversation($request, $conversation);
+        $conversation = $this->findConversation($request, $conversation);
 
         $validated = $request->validate([
             'message' => ['required', 'string', 'max:4000'],
@@ -93,19 +96,38 @@ class SupportAssistantController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, SupportConversation $conversation): JsonResponse
+    public function destroy(Request $request, int $conversation): JsonResponse
     {
-        $this->authorizeConversation($request, $conversation);
+        $conversation = $this->findConversation($request, $conversation);
         $conversation->delete();
 
         return response()->json(['message' => 'تم حذف المحادثة.']);
     }
 
-    protected function authorizeConversation(Request $request, SupportConversation $conversation): void
+    /**
+     * Resolve a conversation the caller owns.
+     *
+     * Ownership is the authorisation rule, but the lookup stays tenant-aware:
+     * a tenant user can never reach another school's row. A platform-level user
+     * (owner/ministry) has no active tenant, so the scoped binding would 404 a
+     * conversation they legitimately created — hence the explicit bypass.
+     */
+    protected function findConversation(Request $request, int $id): SupportConversation
     {
-        if ($conversation->user_id !== $request->user()->getKey()) {
+        $user = $request->user();
+        $tenantId = app(TenantManager::class)->tenantId();
+
+        $query = $tenantId === null
+            ? SupportConversation::allTenants()
+            : SupportConversation::query();
+
+        $conversation = $query->find($id);
+
+        if ($conversation === null || $conversation->user_id !== $user->getKey()) {
             abort(404, 'المحادثة غير موجودة.');
         }
+
+        return $conversation;
     }
 
     protected function locale(Request $request): string

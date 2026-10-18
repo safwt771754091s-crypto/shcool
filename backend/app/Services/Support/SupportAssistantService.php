@@ -6,6 +6,7 @@ use App\Models\Support\SupportConversation;
 use App\Models\Support\SupportMessage;
 use App\Models\Support\SupportTicket;
 use App\Models\User;
+use App\Support\Tenancy\Scopes\TenantScope;
 use Illuminate\Support\Collection;
 use Throwable;
 
@@ -363,6 +364,7 @@ class SupportAssistantService
         $messages = [];
 
         $history = $conversation->messages()
+            ->withoutGlobalScope(TenantScope::class)
             ->whereIn('role', [SupportMessage::ROLE_USER, SupportMessage::ROLE_ASSISTANT])
             ->orderByDesc('id')
             ->limit((int) config('support.history_limit', 12))
