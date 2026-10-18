@@ -94,7 +94,7 @@ SUBJECT="$(git log -1 --pretty=%s)"
 git tag -a "$TAG" -m "$TAG ($DATE)" -m "${DESCRIPTION:-$SUBJECT} (commit $SHA)" \
   && echo "tagged: $TAG -> $SHA"
 
-# --- Manual only: self-contained bundle + refreshed index -------------------
+# --- Manual only: self-contained bundle + refreshed, committed index --------
 if [ "$MODE" = "manual" ]; then
   BUNDLE="$SNAP_DIR/$TAG.bundle"
   if git bundle create "$BUNDLE" --all >/dev/null 2>&1; then
@@ -103,6 +103,11 @@ if [ "$MODE" = "manual" ]; then
     echo "bundle: FAILED (tag kept)"
   fi
   rebuild_index
+  if [ -n "$(git status --porcelain -- "$LOG_FILE")" ]; then
+    git add "$LOG_FILE"
+    git commit -q -m "chore(snapshots): index for $TAG ($DATE)" || true
+    echo "index committed"
+  fi
 fi
 
 # --- Optional: push the tag for offsite backup ------------------------------
