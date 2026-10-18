@@ -6,3 +6,7 @@
 .DS_Store
 Thumbs.db
 dump.rdb
+
+# Local snapshot bundles (the dated log SNAPSHOTS.md stays versioned)
+.snapshots/*.bundle
+.snapshots/*.bundle.lock

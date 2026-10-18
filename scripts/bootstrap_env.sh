@@ -47,6 +47,9 @@ if [ "${FRESH:-0}" = "1" ]; then
 fi
 
 # 5. Run the demo (API + Flutter web) --------------------------------------
+echo ">> installing git hooks"
+bash "$ROOT/scripts/setup_hooks.sh" || true
+
 echo ">> starting demo"
 bash "$ROOT/scripts/run_demo.sh"
 

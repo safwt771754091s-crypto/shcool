@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#
+# post-commit — keep a dated snapshot after every change.
+#
+# Installed via `scripts/setup_hooks.sh` (core.hooksPath = scripts/hooks).
+# Runs after each commit and records a dated, restorable snapshot tag. It never
+# blocks the commit: any failure is swallowed. A self-contained bundle is made
+# on every 20th snapshot so the history is recoverable offsite without bloating
+# the repo on every single commit.
+#
+set -uo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+cd "$REPO_ROOT" || exit 0
+
+# Let a snapshot script trigger its own commit without recursing forever.
+if [ -n "${SNAPSHOT_IN_PROGRESS:-}" ]; then
+  exit 0
+fi
+
+export SNAPSHOT_IN_PROGRESS=1
+COUNT="$(git rev-list --count HEAD 2>/dev/null || echo 0)"
+
+if [ $((COUNT % 20)) -eq 0 ]; then
+  bash scripts/snapshot.sh --auto --push "auto after commit $(git rev-parse --short HEAD)" >/dev/null 2>&1 || true
+else
+  bash scripts/snapshot.sh --auto "auto after commit $(git rev-parse --short HEAD)" >/dev/null 2>&1 || true
+fi
+
+exit 0
