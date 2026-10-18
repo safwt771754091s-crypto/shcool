@@ -22,6 +22,7 @@ import 'services/portal_service.dart';
 import 'services/records_service.dart';
 import 'services/staff_service.dart';
 import 'services/student_service.dart';
+import 'services/support_service.dart';
 import 'services/sync_service.dart';
 import 'services/teacher_service.dart';
 import 'state/auth_provider.dart';
@@ -58,6 +59,7 @@ class SchoolApp extends StatelessWidget {
         Provider<ImportService>(create: (_) => ImportService(api)),
         Provider<SyncService>(create: (_) => SyncService(api, OfflineStore())),
         Provider<AiService>(create: (_) => AiService(api)),
+        Provider<SupportService>(create: (_) => SupportService(api)),
         ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(AuthService(api, tokens))..bootstrap(),
         ),

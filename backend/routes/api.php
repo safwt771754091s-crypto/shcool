@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\PortalController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SportsLeagueController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\Support\SupportAssistantController;
+use App\Http\Controllers\Api\Support\SupportTicketController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\TeacherDashboardController;
@@ -347,6 +349,36 @@ Route::prefix('v1')->group(function (): void {
                 ->middleware('permission:ai.chat');
             Route::delete('ai/conversations/{conversation}', [AiController::class, 'destroy'])
                 ->middleware('permission:ai.chat');
+
+            // ---- Customer-service assistant (مساعد خدمة العملاء) --------
+            // Grounded, Arabic-first support chat + an escalation desk. Each
+            // endpoint is scoped to the caller; the desk (support.manage) sees
+            // every ticket in the school.
+            Route::prefix('support')->group(function (): void {
+                Route::get('assistant', [SupportAssistantController::class, 'index'])
+                    ->middleware('permission:support.view');
+                Route::post('assistant/conversations', [SupportAssistantController::class, 'store'])
+                    ->middleware('permission:support.chat');
+                Route::get('assistant/conversations/{conversation}', [SupportAssistantController::class, 'show'])
+                    ->middleware('permission:support.view');
+                Route::post('assistant/conversations/{conversation}/messages', [SupportAssistantController::class, 'message'])
+                    ->middleware('permission:support.chat');
+                Route::delete('assistant/conversations/{conversation}', [SupportAssistantController::class, 'destroy'])
+                    ->middleware('permission:support.chat');
+
+                // Tickets: any signed-in user may raise/read their own; the desk
+                // permissions gate the queue-wide views and management.
+                Route::get('tickets', [SupportTicketController::class, 'index'])
+                    ->middleware('permission:support.view');
+                Route::post('tickets', [SupportTicketController::class, 'store'])
+                    ->middleware('permission:support.chat');
+                Route::get('tickets/{ticket}', [SupportTicketController::class, 'show'])
+                    ->middleware('permission:support.view');
+                Route::post('tickets/{ticket}/messages', [SupportTicketController::class, 'reply'])
+                    ->middleware('permission:support.view');
+                Route::patch('tickets/{ticket}', [SupportTicketController::class, 'update'])
+                    ->middleware('permission:support.manage');
+            });
         });
     });
 });

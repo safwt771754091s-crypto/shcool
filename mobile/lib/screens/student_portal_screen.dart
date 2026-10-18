@@ -9,6 +9,7 @@ import '../widgets/stat_card.dart';
 import 'national_ranking_screen.dart';
 import 'notifications_screen.dart';
 import 'ai_assistant_screen.dart';
+import 'support_assistant_screen.dart';
 import '../widgets/install_app.dart';
 
 class StudentPortalScreen extends StatefulWidget {
@@ -131,6 +132,16 @@ class _StudentPortalScreenState extends State<StudentPortalScreen> {
                     trailing: const Icon(Icons.chevron_left),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const AiAssistantScreen(initialAgent: 'student_assistant'))),
+                  ),
+                ),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.support_agent_outlined),
+                    title: const Text('مساعد خدمة العملاء'),
+                    subtitle: const Text('أسئلة شائعة ومشكلات، مع تحويل الطلبات إلى الدعم البشري'),
+                    trailing: const Icon(Icons.chevron_left),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const SupportAssistantScreen())),
                   ),
                 ),
                 Card(

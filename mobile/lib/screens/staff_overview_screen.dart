@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../state/auth_provider.dart';
 import '../widgets/install_app.dart';
+import 'support_assistant_screen.dart';
 
 /// Landing view for administrative roles (مدير مدرسة، وزارة، حسابات...).
 ///
@@ -71,6 +72,19 @@ class StaffOverviewScreen extends StatelessWidget {
                         .toList(),
                   ),
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: ListTile(
+              leading: const Icon(Icons.support_agent_outlined),
+              title: const Text('مساعد خدمة العملاء'),
+              subtitle: const Text('أسئلة شائعة ومشكلات، مع تحويل الطلبات إلى الدعم البشري'),
+              trailing: const Icon(Icons.chevron_left),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SupportAssistantScreen()),
               ),
             ),
           ),

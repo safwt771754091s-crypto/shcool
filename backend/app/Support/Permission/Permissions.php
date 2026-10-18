@@ -46,6 +46,12 @@ final class Permissions
         // AI agents (وكلاء الذكاء الاصطناعي) — read-only assistants.
         'ai' => ['view', 'chat', 'manage'],
 
+        // Customer service assistant (مساعد خدمة العملاء) + support desk.
+        // view  = open the assistant and read own tickets
+        // chat  = talk to the assistant
+        // manage = work the support desk (all tickets, reply, assign, resolve)
+        'support' => ['view', 'chat', 'manage'],
+
         // Platform ownership: reserved for the owner account.
         'platform' => ['view', 'manage', 'manage-admins', 'impersonate', 'monitor'],
     ];

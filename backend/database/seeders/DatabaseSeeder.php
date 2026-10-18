@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             MiniAppSeeder::class,
             PeopleSeeder::class,
             AcademicRecordsSeeder::class,
+            \Database\Seeders\Support\KnowledgeBaseSeeder::class,
         ]);
     }
 }

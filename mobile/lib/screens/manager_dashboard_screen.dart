@@ -11,6 +11,7 @@ import 'import_screen.dart';
 import 'notifications_screen.dart';
 import 'reports_screen.dart';
 import 'students_screen.dart';
+import 'support_assistant_screen.dart';
 import 'teachers_screen.dart';
 import 'users_screen.dart';
 import '../widgets/install_app.dart';
@@ -99,6 +100,20 @@ class ManagerDashboardScreen extends StatelessWidget {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                     builder: (_) => const AiAssistantScreen(initialAgent: 'manager_assistant')),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            child: ListTile(
+              leading: const Icon(Icons.support_agent_outlined),
+              title: const Text('مساعد خدمة العملاء'),
+              subtitle: const Text('أسئلة شائعة ومشكلات، مع تحويل الطلبات إلى الدعم البشري'),
+              trailing: const Icon(Icons.chevron_left),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SupportAssistantScreen()),
               ),
             ),
           ),
