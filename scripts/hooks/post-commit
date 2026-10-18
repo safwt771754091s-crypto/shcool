@@ -20,11 +20,13 @@ fi
 
 export SNAPSHOT_IN_PROGRESS=1
 COUNT="$(git rev-list --count HEAD 2>/dev/null || echo 0)"
+SUBJECT="$(git log -1 --pretty=%s 2>/dev/null)"
+NOTE="تلقائي: $SUBJECT"
 
 if [ $((COUNT % 20)) -eq 0 ]; then
-  bash scripts/snapshot.sh --auto --push "auto after commit $(git rev-parse --short HEAD)" >/dev/null 2>&1 || true
+  bash scripts/snapshot.sh --auto --push "$NOTE" >/dev/null 2>&1 || true
 else
-  bash scripts/snapshot.sh --auto "auto after commit $(git rev-parse --short HEAD)" >/dev/null 2>&1 || true
+  bash scripts/snapshot.sh --auto "$NOTE" >/dev/null 2>&1 || true
 fi
 
 exit 0
