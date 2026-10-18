@@ -429,6 +429,25 @@ API_PUBLIC=https://<api-host> bash scripts/build_android.sh
   `scripts/run_demo.sh` و`scripts/build_android.sh` مضيف الـ API من متغيّر
   `RUNTIME_URL` تلقائياً (ويمكن تجاوزه عبر `API_PUBLIC`).
 
+## النسخ الاحتياطية واللقطات (Snapshots)
+
+المستودع يحفظ **لقطة (snapshot) مؤرّخة قابلة للاستعادة** عند أي تغيير، للعودة إليها إذا
+حدث تعديل غير مرغوب فيه. كل لقطة هي وسم (tag) مؤرّخ `snap-YYYY-MM-DD-HHMM`، ووسم
+الشرح (annotation) يوضّح التغيير وتاريخه.
+
+```bash
+scripts/snapshot.sh "وصف التغيير"   # لقطة يدوية: commit + tag + bundle + فهرس
+scripts/snapshot.sh --list          # عرض فهرس اللقطات
+scripts/snapshot.sh --push          # رفع الوسم إلى origin (نسخة بعيدة)
+git checkout <tag>                  # العودة إلى لقطة سابقة
+```
+
+- **تلقائياً:** خطّاف `post-commit` (مُثبَّت عبر `scripts/setup_hooks.sh`) ينشئ لقطة بعد
+  **كل** commit، ويُدفع الوسم للبعيد كل 20 لقطة.
+- **الفهرس المؤرّخ:** `.snapshots/SNAPSHOTS.md` (مُتتبَّع في Git) يسرد كل لقطة بتاريخها ووصفها.
+- **النسخة الكاملة:** `.snapshots/<tag>.bundle` نسخة مستقلة كاملة (غير مُتتبَّعة).
+  الاستعادة: `git clone .snapshots/<tag>.bundle /tmp/restored`.
+
 ## الخطوات التالية
 
 - توسيع لوحة الوزارة للترتيب الوطني وتقارير المقارنة بين المديريات.
