@@ -32,5 +32,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Keep AI key resolution deterministic: no static key, no refresh. -->
+        <env name="AI_API_KEY" value=""/>
+        <env name="AI_KEY_REFRESH_URL" value=""/>
+        <env name="AI_KEY_REFRESH_SECRET" value=""/>
     </php>
 </phpunit>

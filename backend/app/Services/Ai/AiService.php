@@ -42,36 +42,93 @@ class AiService
             return $this->apiKey;
         }
 
-        $refreshUrl = config('ai.key_refresh_url');
+        $refreshUrl = (string) config('ai.key_refresh_url');
+
+        // Runtime env fallback (rotated sandbox session key) is skipped in
+        // tests so key resolution stays deterministic.
+        if (blank($refreshUrl) && ! app()->environment('testing')) {
+            $refreshUrl = $this->runtimeEnv('OH_LLM_API_KEY_REFRESH_URL');
+        }
 
         if (blank($refreshUrl)) {
             return null;
         }
 
         return Cache::remember(
-            'ai.managed_key',
+            'ai.managed_key.v2',
             max(30, (int) config('ai.key_ttl', 600)),
             function () use ($refreshUrl) {
-                $request = Http::acceptJson()->timeout(10);
-                $secret = config('ai.key_refresh_secret');
+                // Preferred: the explicit .env secret. Fallback: the session key
+                // the OpenHands runtime exports (OH_LLM_API_KEY_REFRESH_HEADERS),
+                // so a rotated sandbox keeps working without editing .env.
+                $secrets = array_values(array_unique(array_filter(
+                    [config('ai.key_refresh_secret'), ...$this->runtimeRefreshSecrets()],
+                    'filled',
+                )));
 
-                if (filled($secret)) {
-                    $request = $request->withHeaders([
-                        (string) config('ai.key_refresh_header', 'X-Session-API-Key') => $secret,
-                    ]);
+                $last = null;
+
+                foreach ($secrets as $secret) {
+                    $response = Http::acceptJson()->timeout(10)
+                        ->withHeaders([
+                            (string) config('ai.key_refresh_header', 'X-Session-API-Key') => $secret,
+                        ])
+                        ->get($refreshUrl);
+
+                    if ($response->successful()) {
+                        return trim($response->body());
+                    }
+
+                    $last = $response;
                 }
 
-                $response = $request->get($refreshUrl);
-
-                if ($response->failed()) {
-                    throw new RuntimeException(
-                        'AI key refresh failed: HTTP '.$response->status()
-                    );
-                }
-
-                return trim($response->body());
+                throw new RuntimeException(
+                    'AI key refresh failed: HTTP '.($last?->status() ?? 0)
+                );
             }
         );
+    }
+
+    /** Read a runtime environment variable (FastCGI/cli-safe). */
+    private function runtimeEnv(string $name): string
+    {
+        $value = getenv($name);
+
+        if ($value === false || $value === '') {
+            $value = $_SERVER[$name] ?? ($_ENV[$name] ?? '');
+        }
+
+        return (string) $value;
+    }
+
+    /**
+     * Session keys exposed by the OpenHands runtime, if any.
+     *
+     * @return list<string>
+     */
+    private function runtimeRefreshSecrets(): array
+    {
+        $secrets = [];
+
+        $raw = $this->runtimeEnv('OH_LLM_API_KEY_REFRESH_HEADERS');
+
+        if (filled($raw)) {
+            $headers = json_decode($raw, true);
+
+            if (is_array($headers)) {
+                $secrets = array_merge($secrets, array_values(array_filter($headers, 'is_string')));
+            }
+        }
+
+        foreach (['SESSION_API_KEY', 'OH_SESSION_API_KEY'] as $name) {
+            $value = $this->runtimeEnv($name);
+
+            if (filled($value)) {
+                $secrets[] = $value;
+            }
+        }
+
+        return $secrets;
     }
 
     public function isConfigured(): bool

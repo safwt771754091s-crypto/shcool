@@ -18,7 +18,7 @@ if [ ! -x "$PHP_BIN" ]; then
   sudo apt-get update -qq
   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
     php8.4-cli php8.4-mbstring php8.4-xml php8.4-curl php8.4-zip php8.4-bcmath \
-    php8.4-gd php8.4-intl php8.4-mysql php8.4-redis \
+    php8.4-gd php8.4-intl php8.4-mysql php8.4-redis php8.4-sqlite3 \
     mariadb-server redis-server unzip curl
 fi
 sudo ln -sf "$PHP_BIN" /usr/local/bin/php
