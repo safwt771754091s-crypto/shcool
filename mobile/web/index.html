@@ -19,12 +19,14 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="منصة المدرسة الرقمية">
+  <meta name="theme-color" content="#2f6a43">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="منصة المدرسة الرقمية">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
@@ -67,9 +69,10 @@
   </div>
   <script src="flutter_bootstrap.js" async></script>
   <script>
-    // A stale service worker from an earlier build can keep serving the old,
-    // broken main.dart.js even after a fix is deployed. Drop it and its caches
-    // once, then the page loads fresh assets.
+    // This app is installed as a PWA but deliberately ships WITHOUT a service
+    // worker (no offline caching). We still unregister any service worker and
+    // drop its caches left behind by an earlier build, so a stale worker can
+    // never keep serving old assets.
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function (regs) {
         regs.forEach(function (r) { r.unregister(); });

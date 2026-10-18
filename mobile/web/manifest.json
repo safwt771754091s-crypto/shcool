@@ -1,23 +1,28 @@
 {
-    "name": "school_app",
-    "short_name": "school_app",
+    "name": "منصة المدرسة الرقمية",
+    "short_name": "المدرسة الرقمية",
+    "description": "منصة وطنية لإدارة المدارس: الطلاب، المعلمون، الحضور، الدرجات، الرسوم والتقارير.",
+    "lang": "ar",
+    "dir": "rtl",
     "start_url": ".",
+    "scope": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
+    "background_color": "#f6fbf3",
+    "theme_color": "#2f6a43",
     "prefer_related_applications": false,
     "icons": [
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-maskable-192.png",
@@ -30,6 +35,12 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        },
+        {
+            "src": "icons/apple-touch-icon-180.png",
+            "sizes": "180x180",
+            "type": "image/png",
+            "purpose": "any"
         }
     ]
 }

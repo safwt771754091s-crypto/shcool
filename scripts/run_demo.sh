@@ -46,8 +46,10 @@ pkill -f "artisan serve --host=0.0.0.0 --port=$API_PORT" 2>/dev/null
 
 echo "==> Building Flutter web (API_BASE_URL=$API_PUBLIC/api/v1)"
 export PATH="$FLUTTER_BIN:$PATH"
+# --pwa-strategy=none: installable PWA with NO service worker / offline caching.
 (cd "$MOBILE" && flutter pub get >/dev/null && \
-  flutter build web --release --dart-define=API_BASE_URL="$API_PUBLIC/api/v1") || exit 1
+  flutter build web --release --pwa-strategy=none \
+    --dart-define=API_BASE_URL="$API_PUBLIC/api/v1") || exit 1
 
 echo "==> Starting web on :$WEB_PORT"
 pkill -f "serve_web.py" 2>/dev/null
