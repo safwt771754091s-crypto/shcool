@@ -42,28 +42,30 @@ for arg in "$@"; do
   esac
 done
 
-# --- Index / list: rebuild the dated table straight from the tags -----------
+# --- Index: render the dated table straight from the tags -------------------
+render_index() {
+  echo "# Snapshots (لقطات قابلة للاستعادة)"
+  echo
+  echo "| التاريخ | الوسم (tag) | commit | ملاحظة |"
+  echo "|---|---|---|---|"
+  while IFS='|' read -r tag date sha subject body; do
+    [ -z "$tag" ] && continue
+    note="$body"
+    [ -z "$note" ] && note="$subject"
+    printf '| %s | `%s` | `%s` | %s |\n' "$date" "$tag" "$sha" "$note"
+  done < <(git for-each-ref --sort=creatordate \
+    --format='%(refname:short)|%(creatordate:short)|%(*objectname:short)|%(contents:subject)|%(contents:body)' \
+    'refs/tags/snap-*')
+}
+
 rebuild_index() {
   mkdir -p "$SNAP_DIR"
-  {
-    echo "# Snapshots (لقطات قابلة للاستعادة)"
-    echo
-    echo "| التاريخ | الوسم (tag) | commit | ملاحظة |"
-    echo "|---|---|---|---|"
-    while IFS='|' read -r tag date sha subject body; do
-      [ -z "$tag" ] && continue
-      note="$body"
-      [ -z "$note" ] && note="$subject"
-      printf '| %s | `%s` | `%s` | %s |\n' "$date" "$tag" "$sha" "$note"
-    done < <(git for-each-ref --sort=creatordate \
-      --format='%(refname:short)|%(creatordate:short)|%(*objectname:short)|%(contents:subject)|%(contents:body)' \
-      'refs/tags/snap-*')
-  } > "$LOG_FILE"
+  render_index > "$LOG_FILE"
 }
 
 case "$MODE" in
   index) rebuild_index; echo "index refreshed: $LOG_FILE"; exit 0 ;;
-  list)  [ -f "$LOG_FILE" ] && cat "$LOG_FILE" || echo "(no snapshots yet)"; exit 0 ;;
+  list)  render_index; exit 0 ;;
 esac
 
 DATE="$(date +%Y-%m-%d)"
